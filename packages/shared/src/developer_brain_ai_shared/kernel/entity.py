@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 from developer_brain_ai_shared.kernel.id import TypedId
 
 
-@dataclass
+@dataclass(eq=False)
 class Entity:
     """Entidade base. Comparacao por tipo + id."""
 
@@ -30,7 +30,7 @@ class Entity:
         return hash((type(self).__name__, self.id))
 
 
-@dataclass
+@dataclass(eq=False)
 class AggregateRoot(Entity):
     """Raiz de agregado. Mantem eventos pendentes para publicacao no UoW."""
 

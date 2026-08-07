@@ -11,5 +11,7 @@
 | 0007 | Monorepo UV workspace + Clean Architecture por bounded context | Accepted |
 | 0008 | Ciclo kernel↔events resolvido via TYPE_CHECKING | Accepted |
 | 0009 | Estratégia de testes em camadas (unit/integration/arch) | Accepted |
+| 0010 | Login exige tenant_slug (lookup sob RLS ativa) | Accepted |
+| 0011 | Entidades usam @dataclass(eq=False) + eq/hash custom | Accepted |
 
 Formato: Michael Nygard (Context, Decision, Consequences).

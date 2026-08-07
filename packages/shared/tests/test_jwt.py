@@ -6,8 +6,9 @@ from datetime import UTC, datetime
 
 import pytest
 
-from developer_brain_ai_shared.auth import JWTService, TenantId, UserId
+from developer_brain_ai_shared.auth import JWTService
 from developer_brain_ai_shared.errors import UnauthorizedError
+from developer_brain_ai_shared.kernel import TenantId, UserId
 
 SECRET = "test-secret-please-replace-me-12345678901234567890"
 
@@ -53,13 +54,12 @@ def test_decode_tampered_token_raises_unauthorized() -> None:
         svc.decode(tampered, expected_type="access")
 
 
-def test_expired_token_detected() -> None:
+def test_expired_token_decode_raises_unauthorized() -> None:
     svc = JWTService(secret=SECRET, access_ttl_seconds=1)
     pair = svc.issue_pair(UserId.new(), TenantId.new())
     time.sleep(2)
-    payload = svc.decode(pair.access_token, expected_type="access")
-    assert payload.is_expired
-    assert datetime.now(UTC) >= payload.expires_at
+    with pytest.raises(UnauthorizedError):
+        svc.decode(pair.access_token, expected_type="access")
 
 
 def test_short_secret_rejected() -> None:

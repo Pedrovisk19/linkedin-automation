@@ -51,7 +51,7 @@ def test_typed_id_hash_stable() -> None:
 
 
 def test_entity_equality_by_id() -> None:
-    @dataclass
+    @dataclass(eq=False)
     class Foo(Entity):
         pass
 
@@ -65,7 +65,7 @@ def test_aggregate_root_records_and_pulls_events() -> None:
     class FooCreated(DomainEvent):
         pass
 
-    @dataclass
+    @dataclass(eq=False)
     class Foo(AggregateRoot):
         pass
 

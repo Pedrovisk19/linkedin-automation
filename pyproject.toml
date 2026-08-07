@@ -82,12 +82,32 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["apps", "packages", "tests"]
-addopts = "-ra --strict-markers --strict-config"
+addopts = "-ra --strict-markers --strict-config -p no:cacheprovider"
+pythonpath = [
+  "packages/shared/src",
+  "packages/identity/src",
+  "packages/journal/src",
+  "packages/roadmap/src",
+  "packages/projects/src",
+  "packages/studies/src",
+  "packages/library/src",
+  "packages/ai/src",
+  "packages/content/src",
+  "packages/integrations/src",
+  "packages/rag/src",
+  "packages/automation/src",
+  "apps/api",
+  "apps/worker",
+]
 markers = [
   "integration: testes que tocam Postgres/Redis/HTTP real",
   "unit: testes puros de dominio/aplicacao",
 ]
-filterwarnings = ["error"]
+filterwarnings = [
+  "error",
+  "ignore::starlette.exceptions.StarletteDeprecationWarning",
+  "ignore::DeprecationWarning:starlette.*",
+]
 
 # ===== Coverage =====
 [tool.coverage.run]
