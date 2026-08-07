@@ -3,7 +3,12 @@ name = "developer-brain-ai-identity"
 version = "0.1.0"
 description = "Bounded context: identity (Clean Architecture layers)."
 requires-python = ">=3.14"
-dependencies = ["developer-brain-ai-shared", "pydantic[email]>=2.10"]
+dependencies = [
+  "developer-brain-ai-shared",
+  "pydantic[email]>=2.10",
+  "sqlalchemy[asyncio]>=2.0.36",
+  "bcrypt>=4.2",
+]
 
 [tool.uv.sources]
 developer-brain-ai-shared = { workspace = true }

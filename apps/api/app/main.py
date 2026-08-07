@@ -15,11 +15,25 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
+from developer_brain_ai_shared.auth.jwt import JWTService  # type: ignore[import-not-found]
 from developer_brain_ai_shared.errors.http import mount_domain_error_handlers  # type: ignore[import-not-found]
 from developer_brain_ai_shared.logging import configure_logging  # type: ignore[import-not-found]
+from developer_brain_ai_shared.persistence.session import EngineFactory  # type: ignore[import-not-found]
 
 settings = get_settings()
 configure_logging(level=settings.app_log_level, json_output=settings.app_log_json)
+
+_, _session_factory = EngineFactory.build(
+    settings.database_url,
+    pool_size=settings.database_pool_size,
+    max_overflow=settings.database_max_overflow,
+)
+_jwt = JWTService(
+    secret=settings.jwt_secret,
+    algorithm=settings.jwt_alg,
+    access_ttl_seconds=settings.jwt_access_ttl_seconds,
+    refresh_ttl_seconds=settings.jwt_refresh_ttl_seconds,
+)
 
 
 def create_app() -> FastAPI:
@@ -40,6 +54,10 @@ def create_app() -> FastAPI:
     )
 
     mount_domain_error_handlers(app)
+
+    from developer_brain_ai_identity.presentation import mount_identity  # type: ignore[import-not-found]
+
+    app.include_router(mount_identity(session_factory=_session_factory, jwt=_jwt))
 
     @app.get("/healthz", tags=["meta"])
     async def healthz() -> dict[str, str]:
