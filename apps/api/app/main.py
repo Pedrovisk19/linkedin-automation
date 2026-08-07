@@ -58,10 +58,60 @@ def create_app() -> FastAPI:
     from developer_brain_ai_identity.presentation import mount_identity  # type: ignore[import-not-found]
     from developer_brain_ai_identity.presentation.dependencies import get_current_user_factory  # type: ignore[import-not-found]
     from developer_brain_ai_journal.presentation import mount_journal  # type: ignore[import-not-found]
+    from developer_brain_ai_journal.infrastructure.repositories import SqlAlchemyJournalEntryRepository  # type: ignore[import-not-found]
+    from developer_brain_ai_ai.presentation import mount_ai  # type: ignore[import-not-found]
 
     current_user_dep = get_current_user_factory(_jwt)
     app.include_router(mount_identity(session_factory=_session_factory, jwt=_jwt))
     app.include_router(mount_journal(session_factory=_session_factory, current_user_dep=current_user_dep))
+
+    async def _list_journal_for_ai(tenant_id, *, since, until):
+        repo = SqlAlchemyJournalEntryRepository(_session_factory)
+        entries = await repo.list(tenant_id, since=since, until=until)
+        return [
+            {
+                "title": e.title,
+                "entry_date": str(e.entry_date.as_date()),
+                "study_minutes": e.study_minutes.as_int(),
+                "technologies": e.technologies,
+                "learnings": e.learnings[:1200],
+                "difficulties": e.difficulties[:600],
+                "bugs_found": e.bugs_found,
+                "resolutions": e.resolutions,
+            }
+            for e in entries
+        ]
+
+    from pathlib import Path as _Path
+
+    openai_client = None
+    if settings.openai_api_key:
+        try:
+            from openai import AsyncOpenAI
+
+            openai_client = AsyncOpenAI(api_key=settings.openai_api_key)
+        except ImportError:
+            openai_client = None
+
+    if openai_client is not None:
+        class _NoopRunRepo:
+            async def save(self, run):
+                return None
+
+            async def list_recent(self, tenant_id, agent, limit=50):
+                return []
+
+        app.include_router(
+            mount_ai(
+                openai_client=openai_client,
+                prompts_dir=_Path("prompts"),
+                journal_list_fn=_list_journal_for_ai,
+                summary_runs_repo=_NoopRunRepo(),
+                current_user_dep=current_user_dep,
+                chat_model=settings.openai_chat_model,
+                embedding_model=settings.openai_embedding_model,
+            )
+        )
 
     @app.get("/healthz", tags=["meta"])
     async def healthz() -> dict[str, str]:

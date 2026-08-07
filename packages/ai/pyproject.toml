@@ -3,7 +3,11 @@ name = "developer-brain-ai-ai"
 version = "0.1.0"
 description = "Bounded context: ai (Clean Architecture layers)."
 requires-python = ">=3.14"
-dependencies = ["developer-brain-ai-shared", "pydantic>=2.10"]
+dependencies = [
+  "developer-brain-ai-shared",
+  "pydantic>=2.10",
+  "openai>=1.59",
+]
 
 [tool.uv.sources]
 developer-brain-ai-shared = { workspace = true }

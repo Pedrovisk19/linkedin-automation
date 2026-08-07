@@ -14,5 +14,6 @@
 | 0010 | Login exige tenant_slug (lookup sob RLS ativa) | Accepted |
 | 0011 | Entidades usam @dataclass(eq=False) + eq/hash custom | Accepted |
 | 0012 | Sem `from __future__ import annotations` em presentation | Accepted |
+| 0013 | AIProvider: 1 Protocol + Strategy por provedor | Accepted |
 
 Formato: Michael Nygard (Context, Decision, Consequences).
