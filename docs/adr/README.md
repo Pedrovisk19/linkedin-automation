@@ -9,5 +9,7 @@
 | 0005 | Arq como background worker / scheduler | Accepted |
 | 0006 | Sincronização Obsidian read-only | Accepted |
 | 0007 | Monorepo UV workspace + Clean Architecture por bounded context | Accepted |
+| 0008 | Ciclo kernel↔events resolvido via TYPE_CHECKING | Accepted |
+| 0009 | Estratégia de testes em camadas (unit/integration/arch) | Accepted |
 
 Formato: Michael Nygard (Context, Decision, Consequences).

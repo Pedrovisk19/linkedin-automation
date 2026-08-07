@@ -1,11 +1,25 @@
-"""Developer Brain AI — FastAPI composition root."""
+"""Developer Brain AI — FastAPI composition root.
+
+Boot order:
+1. Carrega Settings (pydantic-settings).
+2. Configura structlog (JSON em prod, console em dev).
+3. Monta tratador de DomainError -> HTTP.
+4. Rota /healthz.
+
+Camadas de negocio (identity, journal, ...) sao montadas em suas respectivas fases
+via routers proprios, adicionados aqui quando implementados.
+"""
 from __future__ import annotations
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
+from developer_brain_ai_shared.errors.http import mount_domain_error_handlers  # type: ignore[import-not-found]
+from developer_brain_ai_shared.logging import configure_logging  # type: ignore[import-not-found]
 
 settings = get_settings()
+configure_logging(level=settings.app_log_level, json_output=settings.app_log_json)
 
 
 def create_app() -> FastAPI:
@@ -16,6 +30,16 @@ def create_app() -> FastAPI:
         docs_url="/api/docs",
         openapi_url="/api/openapi.json",
     )
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    mount_domain_error_handlers(app)
 
     @app.get("/healthz", tags=["meta"])
     async def healthz() -> dict[str, str]:

@@ -1,0 +1,134 @@
+"""Unit of Work async + tenant RLS.
+
+Cada use_case abre um ``UnitOfWork`` que:
+
+1. Reserva uma conexao async do pool.
+2. Emite ``SET LOCAL app.tenant_id = $1`` no BEGIN — habilitando RLS transparente.
+3. Expoe ``session`` para os repos.
+4. Em commit/rollback, fecha a sessao e dispara eventos do agregado.
+
+Se o tenant nao estiver no ContextVar (job do worker sem request), o caller DEVE
+passar ``tenant_id`` explicitamente — falhar alto e melhor que vazar dados de
+outro tenant.
+"""
+from __future__ import annotations
+
+from collections.abc import AsyncIterator
+from typing import Protocol
+
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
+
+from developer_brain_ai_shared.events.base import DomainEvent
+from developer_brain_ai_shared.events.dispatcher import EventDispatcher
+from developer_brain_ai_shared.kernel.id import TenantId
+from developer_brain_ai_shared.persistence.tenant import (
+    get_tenant_context,
+    get_tenant_context_optional,
+)
+
+
+class EventPublisher(Protocol):
+    async def publish(self, event: DomainEvent) -> None: ...
+
+
+class UnitOfWork:
+    """Context manager async que aplica RLS por tenant e comita/rollback atomico."""
+
+    def __init__(
+        self,
+        session_factory: async_sessionmaker[AsyncSession],
+        event_dispatcher: EventDispatcher,
+        tenant_id: TenantId | None = None,
+    ) -> None:
+        self._factory = session_factory
+        self._dispatcher = event_dispatcher
+        self._explicit_tenant = tenant_id
+        self.session: AsyncSession | None = None
+        self._events_published = 0
+
+    async def __aenter__(self) -> AsyncSession:
+        self.session = self._factory()
+        tenant = self._explicit_tenant or get_tenant_context_optional()
+        if tenant is None:
+            await self.session.close()
+            raise RuntimeError("UnitOfWork sem tenant context — chame set_tenant_context")
+        # RLS: variavel de sessao. SET LOCAL so vale dentro da transacao atual.
+        await self.session.execute(
+            __import__("sqlalchemy").text("SET LOCAL app.tenant_id = :tid"),
+            {"tid": str(tenant.as_uuid())},
+        )
+        return self.session
+
+    async def __aexit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, _: object) -> None:
+        if self.session is None:
+            return
+        try:
+            if exc is None:
+                await self.session.commit()
+            else:
+                await self.session.rollback()
+        finally:
+            await self.session.close()
+            self.session = None
+
+    async def commit_and_publish(self, aggregates: list) -> int:
+        """Apos commit, coleta eventos dos aggregate roots e publica via dispatcher."""
+        if self.session is None:
+            raise RuntimeError("UoW closed")
+        events: list[DomainEvent] = []
+        for agg in aggregates:
+            if hasattr(agg, "pull_events"):
+                events.extend(agg.pull_events())
+        await self.session.commit()
+        for ev in events:
+            await self._dispatcher.publish(ev)
+            self._events_published += 1
+        return self._events_published
+
+
+class EngineFactory:
+    """Helper para construir engine + session factory com retry basico."""
+
+    @staticmethod
+    def build(
+        url: str,
+        pool_size: int = 10,
+        max_overflow: int = 20,
+        pool_pre_ping: bool = True,
+    ) -> tuple[AsyncEngine, async_sessionmaker[AsyncSession]]:
+        from sqlalchemy.ext.asyncio import async_engine_from_config
+
+        engine = async_engine_from_config(
+            {
+                "sqlalchemy.url": url,
+                "sqlalchemy.pool_size": pool_size,
+                "sqlalchemy.max_overflow": max_overflow,
+                "sqlalchemy.pool_pre_ping": pool_pre_ping,
+            },
+            prefix="sqlalchemy.",
+        )
+        factory = async_sessionmaker(engine, expire_on_commit=False)
+        return engine, factory
+
+
+async def tenant_scoped_session(
+    factory: async_sessionmaker[AsyncSession],
+) -> AsyncIterator[AsyncSession]:
+    """Generatro utilitario p/ endpoints que precisam de sessao RLS sem UoW explicito."""
+    session = factory()
+    tenant = get_tenant_context()
+    try:
+        await session.execute(
+            __import__("sqlalchemy").text("SET LOCAL app.tenant_id = :tid"),
+            {"tid": str(tenant.as_uuid())},
+        )
+        yield session
+        await session.commit()
+    except Exception:
+        await session.rollback()
+        raise
+    finally:
+        await session.close()
+
+
+__all__ = ["UnitOfWork", "EngineFactory", "EventPublisher", "tenant_scoped_session"]
