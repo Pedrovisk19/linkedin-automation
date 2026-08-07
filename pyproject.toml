@@ -1,0 +1,107 @@
+[project]
+name = "developer-brain-ai"
+version = "0.1.0"
+description = "Developer Brain AI - second brain for developers (monorepo)."
+readme = "README.md"
+requires-python = ">=3.14"
+license = { text = "Proprietary" }
+authors = [{ name = "Developer Brain AI" }]
+
+# Dependencias de tooling/CI centralizadas; deps de runtime ficam em cada membro do workspace.
+dependencies = [
+    "fastapi>=0.118",
+    "uvicorn[standard]>=0.32",
+    "sqlalchemy[asyncio]>=2.0.36",
+    "alembic>=1.14",
+    "pydantic>=2.10",
+    "pydantic-settings>=2.7",
+    "asyncpg>=0.30",
+    "redis>=5.2",
+    "arq>=0.26",
+    "httpx>=0.28",
+    "openai>=1.59",
+    "pgvector>=0.3.6",
+    "structlog>=24.4",
+    "tenacity>=9.0",
+    "python-jose[cryptography]>=3.3",
+    "passlib[bcrypt]>=1.7",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.25",
+    "pytest-cov>=6.0",
+    "respx>=0.22",
+    "freezegun>=1.5",
+    "ruff>=0.8",
+    "black>=24.10",
+    "mypy>=1.13",
+    "types-redis",
+    "types-python-jose",
+]
+
+# ===== UV workspace (PEP 735) =====
+[tool.uv.workspace]
+members = ["apps/api", "apps/worker", "packages/*"]
+
+[tool.uv.sources]
+developer-brain-ai-shared     = { workspace = true }
+developer-brain-ai-identity   = { workspace = true }
+developer-brain-ai-journal    = { workspace = true }
+developer-brain-ai-roadmap    = { workspace = true }
+developer-brain-ai-projects   = { workspace = true }
+developer-brain-ai-studies    = { workspace = true }
+developer-brain-ai-library    = { workspace = true }
+developer-brain-ai-ai         = { workspace = true }
+developer-brain-ai-content    = { workspace = true }
+developer-brain-ai-integrations = { workspace = true }
+developer-brain-ai-rag        = { workspace = true }
+developer-brain-ai-automation = { workspace = true }
+
+# ===== Black =====
+[tool.black]
+line-length = 100
+target-version = ["py314"]
+
+# ===== MyPy =====
+[tool.mypy]
+python_version = "3.14"
+strict = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = "arq.*,pgvector.*"
+ignore_missing_imports = true
+
+# ===== Pytest =====
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["apps", "packages", "tests"]
+addopts = "-ra --strict-markers --strict-config"
+markers = [
+  "integration: testes que tocam Postgres/Redis/HTTP real",
+  "unit: testes puros de dominio/aplicacao",
+]
+filterwarnings = ["error"]
+
+# ===== Coverage =====
+[tool.coverage.run]
+branch = true
+source = ["packages", "apps"]
+omit = ["*/tests/*", "*/migrations/*"]
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
+skip_covered = false
+exclude_lines = [
+  "pragma: no cover",
+  "raise NotImplementedError",
+  "if TYPE_CHECKING:",
+  "\\.\\.\\.",
+]

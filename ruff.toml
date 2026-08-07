@@ -1,0 +1,27 @@
+line-length = 100
+target-version = "py314"
+extend-exclude = ["web", ".venv", "build", "dist"]
+
+[lint]
+select = [
+  "E", "F", "W",     # pycodestyle / pyflakes
+  "I",               # isort
+  "B",               # bugbear
+  "UP",              # pyupgrade
+  "C4",              # comprehensions
+  "SIM",             # simplify
+  "RET",             # return
+  "PTH",             # pathlib
+  "PL",              # pylint
+  "RUF",
+]
+ignore = ["E203", "PLR0913", "PLR2004"]
+fixable = ["ALL"]
+
+[lint.per-file-ignores]
+"tests/**/*" = ["S101", "PLR2004"]
+"docs/**/*"  = ["E501"]
+
+[format]
+line-length = 100
+docstring-code-format = true

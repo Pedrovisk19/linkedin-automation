@@ -1,0 +1,42 @@
+# UV
+.venv/
+.uv-cache/
+__pypackages__/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+coverage.xml
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+
+# Node (web)
+web/node_modules/
+web/.next/
+web/out/
+
+# Misc
+*.log
+*.local

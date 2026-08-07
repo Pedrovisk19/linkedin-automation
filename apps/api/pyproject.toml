@@ -1,0 +1,34 @@
+[project]
+name = "developer-brain-ai-api"
+version = "0.1.0"
+description = "FastAPI composition root."
+requires-python = ">=3.14"
+dependencies = [
+  "fastapi>=0.118","uvicorn[standard]>=0.32","pydantic>=2.10",
+  "developer-brain-ai-shared",
+  "developer-brain-ai-identity","developer-brain-ai-journal","developer-brain-ai-roadmap",
+  "developer-brain-ai-projects","developer-brain-ai-studies","developer-brain-ai-library",
+  "developer-brain-ai-ai","developer-brain-ai-content","developer-brain-ai-integrations",
+  "developer-brain-ai-rag","developer-brain-ai-automation",
+]
+
+[tool.uv.sources]
+developer-brain-ai-shared     = { workspace = true }
+developer-brain-ai-identity   = { workspace = true }
+developer-brain-ai-journal    = { workspace = true }
+developer-brain-ai-roadmap    = { workspace = true }
+developer-brain-ai-projects   = { workspace = true }
+developer-brain-ai-studies    = { workspace = true }
+developer-brain-ai-library    = { workspace = true }
+developer-brain-ai-ai         = { workspace = true }
+developer-brain-ai-content    = { workspace = true }
+developer-brain-ai-integrations = { workspace = true }
+developer-brain-ai-rag        = { workspace = true }
+developer-brain-ai-automation = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
