@@ -14,7 +14,8 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from developer_brain_ai_shared.persistence.base import Base
-import developer_brain_ai_identity.infrastructure.orm  # noqa: F401  registra ORM
+import developer_brain_ai_identity.infrastructure.orm  # noqa: F401
+import developer_brain_ai_journal.infrastructure.orm  # noqa: F401
 
 config = context.config
 if config.config_file_name is not None:

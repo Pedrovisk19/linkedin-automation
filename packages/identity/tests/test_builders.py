@@ -19,7 +19,7 @@ from developer_brain_ai_identity.application.use_cases.refresh_token import Refr
 from developer_brain_ai_identity.application.use_cases.register_tenant import RegisterTenant
 from developer_brain_ai_shared.auth.jwt import JWTService
 
-from fakes import (
+from identity_fakes import (
     FakeApiKeyRepository,
     FakePasswordHasher,
     FakeTenantRepository,

@@ -3,7 +3,11 @@ name = "developer-brain-ai-journal"
 version = "0.1.0"
 description = "Bounded context: journal (Clean Architecture layers)."
 requires-python = ">=3.14"
-dependencies = ["developer-brain-ai-shared", "pydantic>=2.10"]
+dependencies = [
+  "developer-brain-ai-shared",
+  "pydantic>=2.10",
+  "sqlalchemy[asyncio]>=2.0.36",
+]
 
 [tool.uv.sources]
 developer-brain-ai-shared = { workspace = true }

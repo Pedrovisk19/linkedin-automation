@@ -56,8 +56,12 @@ def create_app() -> FastAPI:
     mount_domain_error_handlers(app)
 
     from developer_brain_ai_identity.presentation import mount_identity  # type: ignore[import-not-found]
+    from developer_brain_ai_identity.presentation.dependencies import get_current_user_factory  # type: ignore[import-not-found]
+    from developer_brain_ai_journal.presentation import mount_journal  # type: ignore[import-not-found]
 
+    current_user_dep = get_current_user_factory(_jwt)
     app.include_router(mount_identity(session_factory=_session_factory, jwt=_jwt))
+    app.include_router(mount_journal(session_factory=_session_factory, current_user_dep=current_user_dep))
 
     @app.get("/healthz", tags=["meta"])
     async def healthz() -> dict[str, str]:

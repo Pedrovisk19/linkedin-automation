@@ -22,7 +22,7 @@ from developer_brain_ai_identity.application.use_cases.register_tenant import Re
 from developer_brain_ai_shared.auth.jwt import JWTService
 from developer_brain_ai_shared.errors.base import ConflictError, NotFoundError, UnauthorizedError
 
-from fakes import (
+from identity_fakes import (
     FakeApiKeyRepository,
     FakePasswordHasher,
     FakeTenantRepository,

@@ -34,7 +34,7 @@ from developer_brain_ai_identity.presentation.dependencies import get_current_us
 from developer_brain_ai_identity.presentation.routers import build_router
 from developer_brain_ai_shared.auth.jwt import JWTService
 
-from fakes import (
+from identity_fakes import (
     FakeApiKeyRepository,
     FakePasswordHasher,
     FakeTenantRepository,
