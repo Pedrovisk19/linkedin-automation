@@ -1,15 +1,19 @@
 """Repository interfaces (Ports) do modulo ai."""
+
 from __future__ import annotations
 
 from typing import Protocol
 
-from developer_brain_ai_ai.domain.aggregates import AgentRun, MemoryFragment
 from developer_brain_ai_shared.kernel.id import TenantId
+
+from developer_brain_ai_ai.domain.aggregates import AgentRun, MemoryFragment
 
 
 class AgentRunRepository(Protocol):
     async def save(self, run: AgentRun) -> None: ...
-    async def list_recent(self, tenant_id: TenantId, agent: str, limit: int = 50) -> list[AgentRun]: ...
+    async def list_recent(
+        self, tenant_id: TenantId, agent: str, limit: int = 50
+    ) -> list[AgentRun]: ...
 
 
 class MemoryFragmentRepository(Protocol):

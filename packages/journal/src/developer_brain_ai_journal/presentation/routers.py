@@ -2,6 +2,7 @@
 
 NAO usa `from __future__ import annotations` (ADR-0012).
 """
+
 from datetime import date
 from typing import Annotated
 

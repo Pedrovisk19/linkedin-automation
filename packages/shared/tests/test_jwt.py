@@ -1,11 +1,10 @@
 """Testes do JWTService: issue/decode, tipos, expiracao, segredo curto."""
+
 from __future__ import annotations
 
 import time
-from datetime import UTC, datetime
 
 import pytest
-
 from developer_brain_ai_shared.auth import JWTService
 from developer_brain_ai_shared.errors import UnauthorizedError
 from developer_brain_ai_shared.kernel import TenantId, UserId

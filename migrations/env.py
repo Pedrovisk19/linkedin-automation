@@ -3,19 +3,21 @@
 Imports ORM dos bounded contexts registrados aqui para que ``target_metadata``
 tenha todas as tabelas definidas (autogenerate funcional).
 """
+
 from __future__ import annotations
 
 import asyncio
 from logging.config import fileConfig
 
+import developer_brain_ai_automation.infrastructure.orm  # noqa: F401
+import developer_brain_ai_content.infrastructure.orm  # noqa: F401
+import developer_brain_ai_identity.infrastructure.orm  # noqa: F401
+import developer_brain_ai_journal.infrastructure.orm  # noqa: F401
 from alembic import context
+from developer_brain_ai_shared.persistence.base import Base
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
-
-from developer_brain_ai_shared.persistence.base import Base
-import developer_brain_ai_identity.infrastructure.orm  # noqa: F401
-import developer_brain_ai_journal.infrastructure.orm  # noqa: F401
 
 config = context.config
 if config.config_file_name is not None:

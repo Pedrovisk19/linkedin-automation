@@ -10,12 +10,20 @@ Cada use_case abre um ``UnitOfWork`` que:
 Se o tenant nao estiver no ContextVar (job do worker sem request), o caller DEVE
 passar ``tenant_id`` explicitamente — falhar alto e melhor que vazar dados de
 outro tenant.
+
+Além do UoW, o ``EngineFactory.build`` agora registra um listener de ``begin``
+por conexao: se o ContextVar de tenant estiver setado, emite automaticamente
+``SET LOCAL app.tenant_id`` na primeira transacao da sessao. Isso faz o RLS
+funcionar tambem para repos que abrem sessao propria e para jobs do Arq worker
+(que seta o contexto manualmente por job com ``set_tenant_context``).
 """
+
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
 from typing import Protocol
 
+from sqlalchemy import event, text
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
 from developer_brain_ai_shared.events.base import DomainEvent
@@ -59,7 +67,9 @@ class UnitOfWork:
         )
         return self.session
 
-    async def __aexit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, _: object) -> None:
+    async def __aexit__(
+        self, exc_type: type[BaseException] | None, exc: BaseException | None, _: object
+    ) -> None:
         if self.session is None:
             return
         try:
@@ -87,7 +97,7 @@ class UnitOfWork:
 
 
 class EngineFactory:
-    """Helper para construir engine + session factory com retry basico."""
+    """Helper para construir engine + session factory com retry basico e RLS por transacao."""
 
     @staticmethod
     def build(
@@ -108,7 +118,35 @@ class EngineFactory:
             prefix="sqlalchemy.",
         )
         factory = async_sessionmaker(engine, expire_on_commit=False)
+        _bind_tenant_rls(engine)
         return engine, factory
+
+
+def _begin_handler():
+    """Retorna handler de ``begin`` que define app.tenant_id quando ha tenant no ContextVar.
+
+    Usa ``set_config`` (funcao SQL) em vez de ``SET LOCAL`` porque oSET LOCAL
+    nao suporta parametros bind no protocolo do asyncpg ($1).
+    """
+
+    def _set_app_tenant(conn) -> None:
+        current = get_tenant_context_optional()
+        if current is not None:
+            conn.execute(
+                text("SELECT set_config('app.tenant_id', :tid, true)"),
+                {"tid": str(current.as_uuid())},
+            )
+
+    return _set_app_tenant
+
+
+def _bind_tenant_rls(engine: AsyncEngine, handler=None) -> None:
+    """Registra no engine o handler de RLS (dispara no begin de cada conexao).
+
+    Sem contexto de tenant (migrations, leitura de tenants) nada e emitido.
+    """
+    sync_engine = engine.sync_engine
+    event.listen(sync_engine, "begin", handler or _begin_handler())
 
 
 async def tenant_scoped_session(
@@ -131,4 +169,4 @@ async def tenant_scoped_session(
         await session.close()
 
 
-__all__ = ["UnitOfWork", "EngineFactory", "EventPublisher", "tenant_scoped_session"]
+__all__ = ["EngineFactory", "EventPublisher", "UnitOfWork", "tenant_scoped_session"]

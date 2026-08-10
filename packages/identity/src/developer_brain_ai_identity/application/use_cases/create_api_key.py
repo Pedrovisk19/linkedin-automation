@@ -1,11 +1,13 @@
 """CreateApiKey use case. Gera chave legivel (uma vez), persiste hash SHA-256."""
+
 from __future__ import annotations
+
+from developer_brain_ai_shared.kernel.id import ApiKeyId
+from developer_brain_ai_shared.kernel.timestamp import Timestamps, utcnow
 
 from developer_brain_ai_identity.application.dto import CreateApiKeyInput, CreateApiKeyOutput
 from developer_brain_ai_identity.domain.api_key import ApiKey
 from developer_brain_ai_identity.domain.api_key_repository import ApiKeyRepository
-from developer_brain_ai_shared.kernel.id import ApiKeyId
-from developer_brain_ai_shared.kernel.timestamp import Timestamps, utcnow
 
 
 class CreateApiKey:

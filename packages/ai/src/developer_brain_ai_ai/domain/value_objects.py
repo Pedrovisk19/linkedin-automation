@@ -1,4 +1,5 @@
 """Value objects do modulo ai."""
+
 from __future__ import annotations
 
 import hashlib
@@ -52,4 +53,4 @@ class AgentName:
         return self.value
 
 
-__all__ = ["PromptName", "PromptVersion", "AgentName"]
+__all__ = ["AgentName", "PromptName", "PromptVersion"]

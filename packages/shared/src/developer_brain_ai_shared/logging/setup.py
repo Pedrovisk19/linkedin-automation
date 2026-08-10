@@ -6,6 +6,7 @@
 Nao importa logging stdlib global a fora disso; componentes usam
 ``structlog.get_logger(__name__)`` para criar loggers bound ao contexto.
 """
+
 from __future__ import annotations
 
 import logging
@@ -34,7 +35,9 @@ def configure_logging(level: LogLevel = "INFO", json_output: bool = False) -> No
 
     structlog.configure(
         processors=processors,
-        wrapper_class=structlog.make_filtering_bound_logger(getattr(logging, level.upper(), logging.INFO)),
+        wrapper_class=structlog.make_filtering_bound_logger(
+            getattr(logging, level.upper(), logging.INFO)
+        ),
         cache_logger_on_first_use=True,
     )
 
@@ -51,4 +54,4 @@ def get_logger(name: str | None = None) -> structlog.stdlib.BoundLogger:
     return structlog.get_logger(name)
 
 
-__all__ = ["configure_logging", "bind_context", "clear_context", "get_logger"]
+__all__ = ["bind_context", "clear_context", "configure_logging", "get_logger"]

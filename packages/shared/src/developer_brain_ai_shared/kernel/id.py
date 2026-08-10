@@ -8,13 +8,13 @@ Justificativa: em vez de ``UUID`` solto por todo o código (e tipos trocáveis e
 assinaturas), IDs tipados tornam ``user_id`` e ``tenant_id`` distintos para o
 type-checker — bug de troca é pego em tempo de compilação.
 """
+
 from __future__ import annotations
 
 import uuid
-from typing import Annotated
+from typing import Annotated, TypeAlias
 
 from sqlalchemy import Uuid
-from typing_extensions import TypeAlias
 
 UUIDType: TypeAlias = Annotated[uuid.UUID, Uuid]
 
@@ -28,7 +28,9 @@ class TypedId:
         if isinstance(value, str):
             value = uuid.UUID(value)
         if not isinstance(value, uuid.UUID):
-            raise TypeError(f"{type(self).__name__} requires UUID or str, got {type(value).__name__}")
+            raise TypeError(
+                f"{type(self).__name__} requires UUID or str, got {type(value).__name__}"
+            )
         object.__setattr__(self, "_value", value)
 
     @classmethod
@@ -72,4 +74,4 @@ class ApiKeyId(TypedId):
     """Identificador de API key."""
 
 
-__all__ = ["TypedId", "TenantId", "UserId", "ApiKeyId", "UUIDType"]
+__all__ = ["ApiKeyId", "TenantId", "TypedId", "UUIDType", "UserId"]

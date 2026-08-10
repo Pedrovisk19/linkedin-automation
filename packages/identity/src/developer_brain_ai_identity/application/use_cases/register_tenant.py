@@ -3,7 +3,13 @@
 Cria um novo Tenant + um User admin vinculado a ele. Operacao atomica:
 ambos persistidos ou nenhum. Idempotente por slug e email (undef uuids new).
 """
+
 from __future__ import annotations
+
+from developer_brain_ai_shared.auth.password import PasswordHasher
+from developer_brain_ai_shared.errors.base import ConflictError
+from developer_brain_ai_shared.kernel.id import TenantId, UserId
+from developer_brain_ai_shared.kernel.timestamp import Timestamps, utcnow
 
 from developer_brain_ai_identity.application.dto import RegisterTenantInput, RegisterTenantOutput
 from developer_brain_ai_identity.domain.repositories import TenantRepository, UserRepository
@@ -13,10 +19,6 @@ from developer_brain_ai_identity.domain.value_objects import (
     TenantSlug,
     UserRole,
 )
-from developer_brain_ai_shared.auth.password import PasswordHasher
-from developer_brain_ai_shared.errors.base import ConflictError
-from developer_brain_ai_shared.kernel.id import TenantId, UserId
-from developer_brain_ai_shared.kernel.timestamp import Timestamps, utcnow
 
 
 class RegisterTenant:
@@ -48,7 +50,9 @@ class RegisterTenant:
         from developer_brain_ai_identity.domain.tenant import Tenant
         from developer_brain_ai_identity.domain.user import User
 
-        tenant = Tenant.register(id=tenant_id, slug=slug, name=data.tenant_name, timestamps=tenant_ts)
+        tenant = Tenant.register(
+            id=tenant_id, slug=slug, name=data.tenant_name, timestamps=tenant_ts
+        )
         password_hash = PasswordHash(self._hasher.hash(data.admin_password))
         user = User.register(
             id=user_id,

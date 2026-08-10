@@ -4,6 +4,7 @@ Value objects sao imutaveis, comparaveis por valor e sem identidade. Timestamps
 ``CreatedAt``/``UpdatedAt`` sao value objects de dominio (nao ORM) — a camada de
 infra converte para DateTime do SQLAlchemy.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass

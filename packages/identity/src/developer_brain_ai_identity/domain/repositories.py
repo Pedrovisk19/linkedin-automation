@@ -4,14 +4,16 @@ Estes Protocols vivem no dominio. Implementacoes concretas (SQLAlchemy)
 ficam em ``identity.infrastructure.repositories``. Use cases dependem destas
 interfaces — nunca da implementacao.
 """
+
 from __future__ import annotations
 
 from typing import Protocol
 
+from developer_brain_ai_shared.kernel.id import TenantId, UserId
+
 from developer_brain_ai_identity.domain.tenant import Tenant
 from developer_brain_ai_identity.domain.user import User
 from developer_brain_ai_identity.domain.value_objects import Email, TenantSlug
-from developer_brain_ai_shared.kernel.id import TenantId, UserId
 
 
 class TenantRepository(Protocol):

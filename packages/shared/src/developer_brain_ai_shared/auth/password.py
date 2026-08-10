@@ -4,6 +4,7 @@ O PasswordHasher e uma interface (Protocol); a implementacao concreta
 ``BcryptPasswordHasher`` vive em infrastructure. Mantemos o Protocol aqui para
 que use_cases dependam da abstracao, nao de passlib.
 """
+
 from __future__ import annotations
 
 from typing import Protocol

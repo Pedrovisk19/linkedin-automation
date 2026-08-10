@@ -14,6 +14,7 @@ Os use cases sao injetados via Depends em providers definidos no composition roo
 Nota: SEM `from __future__ import annotations` aqui —必备 para que FastAPI emita
 corretamente os metadados Depends (anotacoes vivas, nao strings).
 """
+
 from typing import Annotated
 
 from fastapi import APIRouter, Depends

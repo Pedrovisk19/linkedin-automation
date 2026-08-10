@@ -1,6 +1,7 @@
 """Composition helper do journal — monta use cases + router com DI."""
-from sqlalchemy.ext.asyncio import async_sessionmaker
+
 from fastapi import APIRouter
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from developer_brain_ai_journal.application.use_cases import (
     CreateJournalEntry,

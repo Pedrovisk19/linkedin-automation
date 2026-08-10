@@ -3,6 +3,7 @@
 Evita reimplementar em cada modulo. Para cursor pagination futura: nova classe
 ``CursorPage`` (YAGNI ate必要时).
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -45,4 +46,4 @@ class PageMeta:
     offset: int
 
 
-__all__ = ["PaginationParams", "Page", "PageMeta"]
+__all__ = ["Page", "PageMeta", "PaginationParams"]

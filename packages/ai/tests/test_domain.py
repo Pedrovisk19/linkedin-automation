@@ -1,8 +1,8 @@
 """Testes do dominio e ports do ai."""
+
 from __future__ import annotations
 
 import pytest
-
 from developer_brain_ai_ai.domain import (
     AgentName,
     MemoryFragment,

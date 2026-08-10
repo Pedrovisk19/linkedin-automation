@@ -9,6 +9,7 @@ Convencao de nomeclatura:
 - UnauthorizedError: auth faltante.
 - ForbiddenError: auth presente mas sem permissao.
 """
+
 from __future__ import annotations
 
 from typing import Any
@@ -60,11 +61,11 @@ class RateLimitError(DomainError):
 
 
 __all__ = [
-    "DomainError",
-    "NotFoundError",
     "ConflictError",
-    "ValidationError",
-    "UnauthorizedError",
+    "DomainError",
     "ForbiddenError",
+    "NotFoundError",
     "RateLimitError",
+    "UnauthorizedError",
+    "ValidationError",
 ]

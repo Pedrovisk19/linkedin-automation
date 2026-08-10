@@ -1,14 +1,11 @@
 """Fakes p/ tests do modulo ai (sem OpenAI real, sem DB)."""
+
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
-from datetime import datetime, UTC
 
-from developer_brain_ai_ai.application.dto import SummaryAgentInput, SummaryAgentOutput
 from developer_brain_ai_ai.application.ports import (
-    AIProvider,
-    ChatMessage,
     ChatRequest,
     ChatResponse,
     EmbedResponse,
@@ -20,7 +17,11 @@ class FakeAIProvider:
 
     name = "fake"
 
-    def __init__(self, *, chat_response: str = '{"title":"ok","markdown":"# R","top_learnings":[],"metrics":{}}') -> None:
+    def __init__(
+        self,
+        *,
+        chat_response: str = '{"title":"ok","markdown":"# R","top_learnings":[],"metrics":{}}',
+    ) -> None:
         self._chat_response = chat_response
         self.last_request: ChatRequest | None = None
         self.calls = 0
@@ -28,7 +29,9 @@ class FakeAIProvider:
     async def chat(self, request: ChatRequest) -> ChatResponse:
         self.calls += 1
         self.last_request = request
-        return ChatResponse(content=self._chat_response, prompt_tokens=10, completion_tokens=20, model="fake-1")
+        return ChatResponse(
+            content=self._chat_response, prompt_tokens=10, completion_tokens=20, model="fake-1"
+        )
 
     async def chat_stream(self, request: ChatRequest) -> AsyncIterator[str]:
         for chunk in self._chat_response.split("\n"):
@@ -78,7 +81,7 @@ class _ChatNamespace:
         self.completions = self
         self.last_kwargs: dict = {}
 
-    async def create(self, **kwargs):  # noqa: ANN201
+    async def create(self, **kwargs):
         self.last_kwargs = kwargs
         if kwargs.get("stream"):
             return _FakeChatStream(self._content)
@@ -104,10 +107,10 @@ class _FakeChatStream:
     def __init__(self, content: str) -> None:
         self._lines = content.split("\n")
 
-    def __aiter__(self):  # noqa: ANN204
+    def __aiter__(self):
         return self
 
-    async def __anext__(self):  # noqa: ANN204
+    async def __anext__(self):
         if not self._lines:
             raise StopAsyncIteration
         line = self._lines.pop(0)
@@ -129,7 +132,7 @@ class _EmbeddingsNamespace:
         self._emb = embedding
         self.calls = 0
 
-    async def create(self, *, model, input):  # noqa: ANN201
+    async def create(self, *, model, input):
         self.calls += 1
         return _FakeEmbeddingResp(data=[_FakeEmbeddingItem(self._emb)])
 
@@ -145,4 +148,4 @@ class FakeAgentRunRepository:
         return list(self.saved)
 
 
-__all__ = ["FakeAIProvider", "FakeOpenAIClient", "FakeAgentRunRepository"]
+__all__ = ["FakeAIProvider", "FakeAgentRunRepository", "FakeOpenAIClient"]

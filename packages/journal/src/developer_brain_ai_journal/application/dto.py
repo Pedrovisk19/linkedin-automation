@@ -1,4 +1,5 @@
 """DTOs do modulo journal (Pydantic)."""
+
 from __future__ import annotations
 
 from datetime import date, datetime
@@ -68,6 +69,6 @@ class JournalEntryOut(BaseModel):
 
 __all__ = [
     "CreateJournalEntryInput",
-    "UpdateJournalEntryInput",
     "JournalEntryOut",
+    "UpdateJournalEntryInput",
 ]

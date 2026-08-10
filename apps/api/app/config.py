@@ -1,4 +1,5 @@
 """API settings via pydantic-settings. Single source of truth for runtime config."""
+
 from __future__ import annotations
 
 from functools import lru_cache
@@ -48,4 +49,4 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    return Settings()  # type: ignore[call-arg]
+    return Settings()

@@ -1,9 +1,11 @@
 """RefreshToken use case: valida refresh, descarta contexto antigo, emite novo par."""
+
 from __future__ import annotations
 
-from developer_brain_ai_identity.application.dto import RefreshInput, TokenOutput
 from developer_brain_ai_shared.auth.jwt import JWTService
 from developer_brain_ai_shared.errors.base import UnauthorizedError
+
+from developer_brain_ai_identity.application.dto import RefreshInput, TokenOutput
 
 
 class RefreshToken:

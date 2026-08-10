@@ -1,4 +1,5 @@
 """Aggregate root ApiKey. Pertence a (tenant, user)."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

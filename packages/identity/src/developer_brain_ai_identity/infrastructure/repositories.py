@@ -7,13 +7,17 @@ para read-only sem UoW explicito).
 IMPORTANTE: a camada application recebe pela DI uma Factory destes repos; aqui
 NAO fazemos set_tenant_context (responsabilidade do caller / middleware).
 """
+
 from __future__ import annotations
 
+from developer_brain_ai_shared.kernel.id import ApiKeyId, TenantId, UserId
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from developer_brain_ai_identity.domain.api_key import ApiKey
 from developer_brain_ai_identity.domain.repositories import TenantRepository, UserRepository
+from developer_brain_ai_identity.domain.tenant import Tenant
+from developer_brain_ai_identity.domain.user import User
 from developer_brain_ai_identity.domain.value_objects import Email, TenantSlug
 from developer_brain_ai_identity.infrastructure.mappers import (
     api_key_from_orm,
@@ -24,7 +28,6 @@ from developer_brain_ai_identity.infrastructure.mappers import (
     user_to_orm,
 )
 from developer_brain_ai_identity.infrastructure.orm import ApiKeyORM, TenantORM, UserORM
-from developer_brain_ai_shared.kernel.id import ApiKeyId, TenantId, UserId
 
 
 def _maybe_session(ctx_session: AsyncSession | None, factory) -> AsyncSession:
@@ -127,7 +130,9 @@ class SqlAlchemyApiKeyRepository:
 
         async with self._factory() as s:
             await s.execute(
-                update(ApiKeyORM).where(ApiKeyORM.id == api_key_id.as_uuid()).values(last_used_at=at)
+                update(ApiKeyORM)
+                .where(ApiKeyORM.id == api_key_id.as_uuid())
+                .values(last_used_at=at)
             )
             await s.commit()
 
@@ -136,13 +141,15 @@ class SqlAlchemyApiKeyRepository:
 
         async with self._factory() as s:
             await s.execute(
-                update(ApiKeyORM).where(ApiKeyORM.id == api_key_id.as_uuid()).values(is_revoked=True)
+                update(ApiKeyORM)
+                .where(ApiKeyORM.id == api_key_id.as_uuid())
+                .values(is_revoked=True)
             )
             await s.commit()
 
 
 __all__ = [
+    "SqlAlchemyApiKeyRepository",
     "SqlAlchemyTenantRepository",
     "SqlAlchemyUserRepository",
-    "SqlAlchemyApiKeyRepository",
 ]

@@ -4,6 +4,7 @@ Usa regex (nao string.Formatter) porque templates usam {{var}} como convencao
 TipScript / Mustache-like. string.Formatter trataria {{var}} como escape de {var},
 o que colidiria com a sintaxe dos nossos prompts.
 """
+
 from __future__ import annotations
 
 import re

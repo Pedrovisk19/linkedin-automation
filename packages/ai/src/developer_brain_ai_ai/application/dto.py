@@ -4,6 +4,7 @@ SummaryAgent:
   input = SummaryAgentInput (list of journal entry dicts + period)
   output = SummaryAgentOutput (title + sections em markdown)
 """
+
 from __future__ import annotations
 
 from datetime import date

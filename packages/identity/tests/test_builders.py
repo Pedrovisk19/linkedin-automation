@@ -1,4 +1,5 @@
 """Testes dos builders de use_cases (DI factories) do identity."""
+
 from __future__ import annotations
 
 from developer_brain_ai_identity.application.use_cases import (
@@ -18,7 +19,6 @@ from developer_brain_ai_identity.application.use_cases.manage_api_keys import (
 from developer_brain_ai_identity.application.use_cases.refresh_token import RefreshToken
 from developer_brain_ai_identity.application.use_cases.register_tenant import RegisterTenant
 from developer_brain_ai_shared.auth.jwt import JWTService
-
 from identity_fakes import (
     FakeApiKeyRepository,
     FakePasswordHasher,
@@ -30,9 +30,7 @@ SECRET = "test-secret-please-replace-me-12345678901234567890"
 
 
 def test_build_register_tenant_returns_use_case() -> None:
-    uc = build_register_tenant(
-        FakeTenantRepository(), FakeUserRepository(), FakePasswordHasher()
-    )
+    uc = build_register_tenant(FakeTenantRepository(), FakeUserRepository(), FakePasswordHasher())
     assert isinstance(uc, RegisterTenant)
 
 

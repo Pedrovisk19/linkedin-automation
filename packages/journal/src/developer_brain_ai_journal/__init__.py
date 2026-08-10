@@ -1,4 +1,5 @@
 """Journal package: aggregate JournalEntry + use cases (CRUD)."""
+
 from developer_brain_ai_journal.domain import (
     EntryDate,
     JournalEntry,
@@ -9,10 +10,10 @@ from developer_brain_ai_journal.domain import (
 )
 
 __all__ = [
+    "EntryDate",
     "JournalEntry",
     "JournalEntryId",
     "JournalEntryRepository",
-    "Tag",
     "StudyMinutes",
-    "EntryDate",
+    "Tag",
 ]

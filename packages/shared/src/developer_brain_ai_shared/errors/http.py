@@ -3,6 +3,7 @@
 Vive em ``shared.errors.http`` — NAO em ``shared.errors.base``. Razao: domain
 nao conhece HTTP. Esta traducao e registrada no composition root (apps/api).
 """
+
 from __future__ import annotations
 
 from fastapi import FastAPI, Request

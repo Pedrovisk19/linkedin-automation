@@ -4,6 +4,7 @@ Eventos carregam apenas dados necessarios para handlers. tenant_id ja vem da
 classe base DomainEvent. Extra fields usam defaults p/ manter keyword-only
 flexivel e evitar ripple quando novos campos aparecem.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -46,10 +47,10 @@ class ApiKeyRevoked(DomainEvent):
 
 
 __all__ = [
-    "TenantRegistered",
-    "UserRegistered",
-    "UserLoggedIn",
-    "UserSuspended",
     "ApiKeyCreated",
     "ApiKeyRevoked",
+    "TenantRegistered",
+    "UserLoggedIn",
+    "UserRegistered",
+    "UserSuspended",
 ]

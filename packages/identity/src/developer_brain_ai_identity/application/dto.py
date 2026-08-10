@@ -1,4 +1,5 @@
 """DTOs (Pydantic) do modulo identity. Camada de comunicação use_case <-> presentation."""
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -9,7 +10,9 @@ from developer_brain_ai_identity.domain.value_objects import UserRole
 
 
 class RegisterTenantInput(BaseModel):
-    tenant_slug: str = Field(min_length=3, max_length=40, pattern=r"^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$")
+    tenant_slug: str = Field(
+        min_length=3, max_length=40, pattern=r"^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$"
+    )
     tenant_name: str = Field(min_length=1, max_length=120)
     admin_email: EmailStr
     admin_name: str = Field(min_length=1, max_length=120)
@@ -62,13 +65,13 @@ class ApiKeyView(BaseModel):
 
 
 __all__ = [
-    "RegisterTenantInput",
-    "RegisterTenantOutput",
-    "LoginInput",
-    "TokenOutput",
-    "RefreshInput",
+    "ApiKeyView",
     "CreateApiKeyInput",
     "CreateApiKeyOutput",
-    "ApiKeyView",
+    "LoginInput",
+    "RefreshInput",
+    "RegisterTenantInput",
+    "RegisterTenantOutput",
+    "TokenOutput",
     "UserRole",
 ]

@@ -1,12 +1,18 @@
 [project]
 name = "developer-brain-ai-content"
 version = "0.1.0"
-description = "Bounded context: content (Clean Architecture layers)."
+description = "Bounded context: content — drafts gerados por agentes + fila de publicacao."
 requires-python = ">=3.14"
-dependencies = ["developer-brain-ai-shared", "pydantic>=2.10"]
+dependencies = [
+  "developer-brain-ai-shared",
+  "developer-brain-ai-ai",
+  "pydantic>=2.10",
+  "sqlalchemy[asyncio]>=2.0.36",
+]
 
 [tool.uv.sources]
 developer-brain-ai-shared = { workspace = true }
+developer-brain-ai-ai = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]

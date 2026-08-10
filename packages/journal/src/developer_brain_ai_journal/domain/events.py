@@ -1,9 +1,11 @@
 """Domain events do modulo journal."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
 
 from developer_brain_ai_shared.events.base import DomainEvent
+
 from developer_brain_ai_journal.domain.ids import JournalEntryId
 
 
@@ -24,6 +26,6 @@ class JournalEntryDeleted(DomainEvent):
 
 __all__ = [
     "JournalEntryCreated",
-    "JournalEntryUpdated",
     "JournalEntryDeleted",
+    "JournalEntryUpdated",
 ]

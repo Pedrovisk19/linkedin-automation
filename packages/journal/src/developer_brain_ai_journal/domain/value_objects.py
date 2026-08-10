@@ -1,4 +1,5 @@
 """Value objects do modulo journal."""
+
 from __future__ import annotations
 
 import re
@@ -54,4 +55,4 @@ class EntryDate:
         return self.value
 
 
-__all__ = ["Tag", "StudyMinutes", "EntryDate"]
+__all__ = ["EntryDate", "StudyMinutes", "Tag"]

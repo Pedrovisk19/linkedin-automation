@@ -1,4 +1,5 @@
 """conftest p/ testes do journal: expoe fakes e paths de import."""
+
 import pathlib
 import sys
 

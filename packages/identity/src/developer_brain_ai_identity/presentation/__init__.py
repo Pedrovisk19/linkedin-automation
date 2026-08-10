@@ -1,8 +1,10 @@
 """Composition helper que monta todos use cases + router do identity em DI."""
+
 from __future__ import annotations
 
-from sqlalchemy.ext.asyncio import async_sessionmaker
+from developer_brain_ai_shared.auth.jwt import JWTService
 from fastapi import APIRouter
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from developer_brain_ai_identity.application.use_cases import (
     build_create_api_key,
@@ -20,7 +22,6 @@ from developer_brain_ai_identity.infrastructure.repositories import (
 )
 from developer_brain_ai_identity.presentation.dependencies import get_current_user_factory
 from developer_brain_ai_identity.presentation.routers import build_router
-from developer_brain_ai_shared.auth.jwt import JWTService
 
 
 def mount_identity(

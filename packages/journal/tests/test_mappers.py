@@ -1,9 +1,10 @@
 """Testes unitarios dos mappers ORM <-> JournalEntry (round-trip sem DB)."""
+
 from __future__ import annotations
 
 import json
 import uuid
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 
 from developer_brain_ai_journal.domain.entry import JournalEntry
 from developer_brain_ai_journal.domain.ids import JournalEntryId
@@ -77,8 +78,8 @@ def test_entry_from_orm_handles_empty_json() -> None:
         links="[]",
         bugs_found="[]",
         resolutions="[]",
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
     )
     rebuilt = entry_from_orm(orm, tag_values=[])
     assert rebuilt.technologies == []
@@ -100,8 +101,8 @@ def test_entry_from_orm_tolerates_corrupted_json() -> None:
         links="[]",
         bugs_found="[]",
         resolutions="[]",
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
     )
     rebuilt = entry_from_orm(orm, tag_values=[])
     assert rebuilt.technologies == []

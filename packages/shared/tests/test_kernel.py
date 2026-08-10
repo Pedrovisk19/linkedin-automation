@@ -1,10 +1,10 @@
 """Testes do kernel: TypedId, Entity, AggregateRoot, Timestamps."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
 
 import pytest
-
 from developer_brain_ai_shared.events.base import DomainEvent
 from developer_brain_ai_shared.kernel import (
     AggregateRoot,

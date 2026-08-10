@@ -12,15 +12,15 @@ uma task; contextvars sao propagadas dentro da mesma task.
 
 Nota: SEM `from __future__ import annotations` para preservar Depends metadata vivo.
 """
-from dataclasses import dataclass
 
-from fastapi import Depends, Header, HTTPException, Request, status
-from typing_extensions import Annotated
+from dataclasses import dataclass
+from typing import Annotated
 
 from developer_brain_ai_shared.auth.jwt import JWTService
 from developer_brain_ai_shared.errors.base import UnauthorizedError
 from developer_brain_ai_shared.kernel.id import TenantId, UserId
 from developer_brain_ai_shared.persistence.tenant import reset_tenant_context, set_tenant_context
+from fastapi import Header, HTTPException, Request, status
 
 
 @dataclass(frozen=True)
@@ -46,7 +46,9 @@ def get_current_user_factory(jwt: JWTService):
         try:
             payload = jwt.decode(token, expected_type="access")
         except UnauthorizedError as exc:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=exc.message) from exc
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail=exc.message
+            ) from exc
 
         set_tenant_context(payload.tenant_id)
 

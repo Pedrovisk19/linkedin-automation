@@ -1,13 +1,13 @@
 """Smoke do mount_identity: monta router via composition helper sem DB real."""
+
 from __future__ import annotations
 
 from unittest.mock import MagicMock
 
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
-
 from developer_brain_ai_identity.presentation import mount_identity
 from developer_brain_ai_shared.auth.jwt import JWTService
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
 
 SECRET = "test-secret-please-replace-me-12345678901234567890"
 

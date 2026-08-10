@@ -5,15 +5,15 @@ Tabelas:
 - journal_entry_tags (join, unique por (entry_id, tag_id))
 - tags (lookup por tenant, unique por (tenant_id, value)).
 """
+
 from __future__ import annotations
 
 import uuid
-from datetime import date, datetime
-
-from sqlalchemy import Date, ForeignKey, Index, Integer, String, Text, Uuid
-from sqlalchemy.orm import Mapped, mapped_column
+from datetime import date
 
 from developer_brain_ai_shared.persistence.base import Base, TenantScopedMixin, TimestampMixin
+from sqlalchemy import Date, ForeignKey, Index, Integer, String, Text, Uuid
+from sqlalchemy.orm import Mapped, mapped_column
 
 
 class JournalEntryORM(TenantScopedMixin, TimestampMixin, Base):
@@ -43,9 +43,7 @@ class JournalEntryORM(TenantScopedMixin, TimestampMixin, Base):
 
 class TagORM(TenantScopedMixin, TimestampMixin, Base):
     __tablename__ = "tags"
-    __table_args__ = (
-        Index("ix_tags_tenant_value", "tenant_id", "value", unique=True),
-    )
+    __table_args__ = (Index("ix_tags_tenant_value", "tenant_id", "value", unique=True),)
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid(), primary_key=True, default=uuid.uuid4)
     value: Mapped[str] = mapped_column(String(40), nullable=False)
@@ -53,9 +51,7 @@ class TagORM(TenantScopedMixin, TimestampMixin, Base):
 
 class JournalEntryTagORM(Base):
     __tablename__ = "journal_entry_tags"
-    __table_args__ = (
-        Index("ix_jet_entry_tag", "journal_entry_id", "tag_id", unique=True),
-    )
+    __table_args__ = (Index("ix_jet_entry_tag", "journal_entry_id", "tag_id", unique=True),)
 
     journal_entry_id: Mapped[uuid.UUID] = mapped_column(
         Uuid(),
@@ -69,4 +65,4 @@ class JournalEntryTagORM(Base):
     )
 
 
-__all__ = ["JournalEntryORM", "TagORM", "JournalEntryTagORM"]
+__all__ = ["JournalEntryORM", "JournalEntryTagORM", "TagORM"]

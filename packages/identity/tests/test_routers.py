@@ -10,16 +10,10 @@ Substitui repos SQLAlchemy por fakes em memória. Cobre:
 - DELETE /auth/api-keys/{id}     -> 204
 - Bizcard invalido: Bearer malformado / token expirado
 """
+
 from __future__ import annotations
 
-import pytest
-from fastapi import FastAPI
-
-from developer_brain_ai_identity.presentation import mount_identity
 from developer_brain_ai_identity.application.dto import (
-    CreateApiKeyInput,
-    LoginInput,
-    RefreshInput,
     RegisterTenantInput,
 )
 from developer_brain_ai_identity.application.use_cases.create_api_key import CreateApiKey
@@ -33,14 +27,14 @@ from developer_brain_ai_identity.application.use_cases.register_tenant import Re
 from developer_brain_ai_identity.presentation.dependencies import get_current_user_factory
 from developer_brain_ai_identity.presentation.routers import build_router
 from developer_brain_ai_shared.auth.jwt import JWTService
-
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
 from identity_fakes import (
     FakeApiKeyRepository,
     FakePasswordHasher,
     FakeTenantRepository,
     FakeUserRepository,
 )
-from fastapi.testclient import TestClient
 
 SECRET = "test-secret-please-replace-me-12345678901234567890"
 REGISTER = RegisterTenantInput(
@@ -76,6 +70,7 @@ def _build_app() -> FastAPI:
     )
     app = FastAPI()
     from developer_brain_ai_shared.errors.http import mount_domain_error_handlers
+
     mount_domain_error_handlers(app)
     app.include_router(router)
     return app

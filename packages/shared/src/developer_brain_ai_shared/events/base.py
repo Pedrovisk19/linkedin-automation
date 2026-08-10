@@ -3,6 +3,7 @@
 Eventos sao dataclasses puras (sem side effects). Odispatcher (application layer)
 coleta eventos dos AggregateRoots apos cada use_case e publica.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field

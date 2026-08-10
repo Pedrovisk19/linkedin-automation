@@ -1,7 +1,9 @@
 """Composition helper do ai. Monta SummaryAgent + router."""
-from pathlib import Path
-from typing import Awaitable, Callable
 
+from collections.abc import Awaitable, Callable
+from pathlib import Path
+
+from developer_brain_ai_shared.kernel.id import TenantId
 from fastapi import APIRouter
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
@@ -9,7 +11,6 @@ from developer_brain_ai_ai.application.prompt_engine import PromptEngine
 from developer_brain_ai_ai.application.use_cases import SummaryAgent
 from developer_brain_ai_ai.infrastructure.openai_provider import OpenAIProvider
 from developer_brain_ai_ai.presentation.routers import build_router
-from developer_brain_ai_shared.kernel.id import TenantId
 
 
 def mount_ai(

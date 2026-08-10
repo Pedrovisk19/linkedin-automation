@@ -1,4 +1,5 @@
 """Composition root parcial do identity: fabricas de use cases para DI."""
+
 from __future__ import annotations
 
 from developer_brain_ai_identity.application.use_cases.create_api_key import CreateApiKey
@@ -36,10 +37,10 @@ def build_revoke_api_key(api_keys) -> RevokeApiKey:
 
 
 __all__ = [
-    "build_register_tenant",
-    "build_login_user",
-    "build_refresh_token",
     "build_create_api_key",
     "build_list_api_keys",
+    "build_login_user",
+    "build_refresh_token",
+    "build_register_tenant",
     "build_revoke_api_key",
 ]

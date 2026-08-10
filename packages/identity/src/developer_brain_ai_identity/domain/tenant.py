@@ -1,7 +1,8 @@
 """Aggregate root Tenant. Raiz do modulo identity."""
+
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from developer_brain_ai_shared.kernel import AggregateRoot
 from developer_brain_ai_shared.kernel.id import TenantId
@@ -25,7 +26,9 @@ class Tenant(AggregateRoot):
             raise ValueError("tenant name excede 120 caracteres")
 
     @classmethod
-    def register(cls, *, id: TenantId, slug: TenantSlug, name: str, timestamps: Timestamps) -> Tenant:
+    def register(
+        cls, *, id: TenantId, slug: TenantSlug, name: str, timestamps: Timestamps
+    ) -> Tenant:
         tenant = cls(id=id, slug=slug, name=name, timestamps=timestamps)
         tenant.record_event(TenantRegistered(tenant_id=id, slug=str(slug), name=name))
         return tenant

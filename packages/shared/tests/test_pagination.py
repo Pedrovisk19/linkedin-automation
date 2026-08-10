@@ -1,4 +1,5 @@
 """Testes de pagination: PaginationParams + Page[T]."""
+
 from __future__ import annotations
 
 from developer_brain_ai_shared.pagination import Page, PaginationParams

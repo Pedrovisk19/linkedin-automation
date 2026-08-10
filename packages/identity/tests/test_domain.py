@@ -1,10 +1,10 @@
 """Testes do dominio identity: invariantes de Tenant, User, ApiKey, value objects."""
+
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 
 import pytest
-
 from developer_brain_ai_identity.domain.api_key import ApiKey
 from developer_brain_ai_identity.domain.tenant import Tenant
 from developer_brain_ai_identity.domain.user import User

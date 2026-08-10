@@ -1,16 +1,14 @@
 """Testes do OpenAIProvider: usa FakeOpenAIClient deterministico, valida chamadas."""
+
 from __future__ import annotations
 
 import asyncio
 import json
 
-import pytest
-
+from ai_fakes import FakeOpenAIClient
 from developer_brain_ai_ai.application.ports import ChatMessage, ChatRequest
 from developer_brain_ai_ai.infrastructure.openai_provider import OpenAIProvider
 from pydantic import BaseModel
-
-from ai_fakes import FakeOpenAIClient
 
 
 class MyModel(BaseModel):
@@ -33,7 +31,9 @@ def test_chat_returns_content_and_usage() -> None:
 def test_chat_passes_temperature_and_max_tokens() -> None:
     client = FakeOpenAIClient(chat_content="x")
     provider = OpenAIProvider(client=client)
-    req = ChatRequest(messages=[ChatMessage(role="user", content="hi")], temperature=0.7, max_tokens=42)
+    req = ChatRequest(
+        messages=[ChatMessage(role="user", content="hi")], temperature=0.7, max_tokens=42
+    )
     asyncio.run(provider.chat(req))
     kw = client.chat.last_kwargs
     assert kw["temperature"] == 0.7

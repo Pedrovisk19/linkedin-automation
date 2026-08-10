@@ -1,4 +1,5 @@
 """Erros de dominio. Traducao para HTTP fica em developer_brain_ai_shared.errors.http."""
+
 from developer_brain_ai_shared.errors.base import (
     ConflictError,
     DomainError,
@@ -10,11 +11,11 @@ from developer_brain_ai_shared.errors.base import (
 )
 
 __all__ = [
-    "DomainError",
-    "NotFoundError",
     "ConflictError",
-    "ValidationError",
-    "UnauthorizedError",
+    "DomainError",
     "ForbiddenError",
+    "NotFoundError",
     "RateLimitError",
+    "UnauthorizedError",
+    "ValidationError",
 ]

@@ -4,6 +4,7 @@
 injetavel. Claims carregam ``sub`` (user_id), ``tenant_id``, ``typ`` (access|refresh),
 ``iat``, ``exp``. Refresh nao cabe em access e vice-versa (checagem em decode).
 """
+
 from __future__ import annotations
 
 import uuid
@@ -82,7 +83,9 @@ class JWTService:
         except (KeyError, ValueError, TypeError) as exc:
             raise UnauthorizedError("claims malformados") from exc
 
-        return TokenPayload(user_id=user_id, tenant_id=tenant_id, token_type=typ, issued_at=iat, expires_at=exp)
+        return TokenPayload(
+            user_id=user_id, tenant_id=tenant_id, token_type=typ, issued_at=iat, expires_at=exp
+        )
 
     def _encode(
         self,
@@ -103,4 +106,4 @@ class JWTService:
         return jwt.encode(claims, self._secret, algorithm=self._algo)
 
 
-__all__ = ["JWTService", "TokenPayload", "TokenPair", "TokenType"]
+__all__ = ["JWTService", "TokenPair", "TokenPayload", "TokenType"]

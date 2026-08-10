@@ -1,4 +1,5 @@
 """SummaryAgent: gera resumo (diario/semanal/mensal) a partir de JournalEntries."""
+
 from __future__ import annotations
 
 import hashlib
@@ -6,14 +7,15 @@ import json
 from dataclasses import dataclass
 from datetime import UTC, datetime
 
+from developer_brain_ai_shared.kernel.id import TenantId
+from developer_brain_ai_shared.kernel.timestamp import Timestamps, utcnow
+
 from developer_brain_ai_ai.application.dto import SummaryAgentInput, SummaryAgentOutput
 from developer_brain_ai_ai.application.ports import AIProvider, ChatMessage, ChatRequest
 from developer_brain_ai_ai.application.prompt_engine import PromptEngine
 from developer_brain_ai_ai.domain.aggregates import AgentRun
 from developer_brain_ai_ai.domain.repositories import AgentRunRepository
 from developer_brain_ai_ai.domain.value_objects import AgentName, PromptName
-from developer_brain_ai_shared.kernel.id import TenantId
-from developer_brain_ai_shared.kernel.timestamp import Timestamps, utcnow
 
 SUMMARY_AGENT = AgentName("summary")
 SUMMARY_PROMPT = PromptName("summary")
@@ -101,9 +103,9 @@ class SummaryAgent:
         lines = []
         for i, e in enumerate(entries, start=1):
             lines.append(
-                f"- {i}. {e.get('title','sem titulo')} ({e.get('entry_date','?')}) | "
-                f"tech={','.join(e.get('technologies',[]))} | "
-                f"minutos={e.get('study_minutes',0)}"
+                f"- {i}. {e.get('title', 'sem titulo')} ({e.get('entry_date', '?')}) | "
+                f"tech={','.join(e.get('technologies', []))} | "
+                f"minutos={e.get('study_minutes', 0)}"
             )
             if e.get("learnings"):
                 lines.append(f"  learnings: {e['learnings'][:300]}")
@@ -135,7 +137,7 @@ class SummaryAgent:
             payload.setdefault("title", f"Resumo {data.period_kind} {data.start_date}")
             payload.setdefault("markdown", content)
             return SummaryAgentOutput(**payload)
-        except (json.JSONDecodeError, ValueError, TypeError):
+        except json.JSONDecodeError, ValueError, TypeError:
             return SummaryAgentOutput(
                 period_kind=data.period_kind,
                 start_date=data.start_date,
@@ -147,4 +149,4 @@ class SummaryAgent:
             )
 
 
-__all__ = ["SummaryAgent", "SummaryAgentConfig", "SUMMARY_AGENT", "SUMMARY_PROMPT"]
+__all__ = ["SUMMARY_AGENT", "SUMMARY_PROMPT", "SummaryAgent", "SummaryAgentConfig"]

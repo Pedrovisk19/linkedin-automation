@@ -1,12 +1,13 @@
 """Testes do PromptEngine: le prompts/*.md reais, cache, render variaveis."""
+
 from __future__ import annotations
 
-import pytest
+from pathlib import Path
 
+import pytest
 from developer_brain_ai_ai.application.prompt_engine import PromptEngine, PromptNotFound
 from developer_brain_ai_ai.domain import PromptName
 from developer_brain_ai_ai.domain.aggregates import PromptTemplate
-from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3] / "prompts"
 
@@ -46,6 +47,14 @@ def test_refresh_reloads_after_cache_clear() -> None:
 
 def test_render_substitutes_summary_variables() -> None:
     tpl = PromptEngine(ROOT).load(PromptName("summary"))
-    rendered = tpl.render({"period_kind": "weekly", "start_date": "2026-01-01", "end_date": "2026-01-07", "entries_blob": "blob", "ai_language": "pt-BR"})
+    rendered = tpl.render(
+        {
+            "period_kind": "weekly",
+            "start_date": "2026-01-01",
+            "end_date": "2026-01-07",
+            "entries_blob": "blob",
+            "ai_language": "pt-BR",
+        }
+    )
     assert "weekly" in rendered
     assert "2026-01-01" in rendered

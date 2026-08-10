@@ -1,7 +1,7 @@
 """Fakes reutilizaveis para os testes do journal (sem DB)."""
+
 from __future__ import annotations
 
-import re
 from collections import defaultdict
 from datetime import date
 

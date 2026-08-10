@@ -1,9 +1,12 @@
 """Repositorio SQLAlchemy para JournalEntry (com suporte a tags + filtros + paginacao)."""
+
 from __future__ import annotations
 
 from datetime import date
 
-from sqlalchemy import and_, delete, select
+from developer_brain_ai_shared.kernel.id import TenantId
+from developer_brain_ai_shared.pagination import PaginationParams
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from developer_brain_ai_journal.domain.entry import JournalEntry
@@ -16,9 +19,6 @@ from developer_brain_ai_journal.infrastructure.orm import (
     JournalEntryTagORM,
     TagORM,
 )
-from developer_brain_ai_shared.errors.base import DomainError
-from developer_brain_ai_shared.kernel.id import TenantId
-from developer_brain_ai_shared.pagination import PaginationParams
 
 
 def _tags_for(entry_id) -> select:
@@ -82,7 +82,6 @@ class SqlAlchemyJournalEntryRepository(JournalEntryRepository):
         pagination: PaginationParams | None = None,
     ) -> list[JournalEntry]:
         pagination = pagination or PaginationParams()
-        from sqlalchemy import func
 
         async with self._factory() as s:
             stmt = select(JournalEntryORM).where(JournalEntryORM.tenant_id == tenant_id.as_uuid())
@@ -92,10 +91,14 @@ class SqlAlchemyJournalEntryRepository(JournalEntryRepository):
                 stmt = stmt.where(JournalEntryORM.entry_date <= until)
 
             if tag:
-                stmt = stmt.join(
-                    JournalEntryTagORM,
-                    JournalEntryTagORM.journal_entry_id == JournalEntryORM.id,
-                ).join(TagORM, TagORM.id == JournalEntryTagORM.tag_id).where(TagORM.value == str(tag))
+                stmt = (
+                    stmt.join(
+                        JournalEntryTagORM,
+                        JournalEntryTagORM.journal_entry_id == JournalEntryORM.id,
+                    )
+                    .join(TagORM, TagORM.id == JournalEntryTagORM.tag_id)
+                    .where(TagORM.value == str(tag))
+                )
 
             if technology:
                 stmt = stmt.where(JournalEntryORM.technologies.like(f'%"{technology}"%'))

@@ -1,10 +1,10 @@
 """Testes do dominio do journal: value objects + invariantes do JournalEntry."""
+
 from __future__ import annotations
 
 from datetime import date, timedelta
 
 import pytest
-
 from developer_brain_ai_journal.domain.entry import JournalEntry
 from developer_brain_ai_journal.domain.ids import JournalEntryId
 from developer_brain_ai_journal.domain.value_objects import EntryDate, StudyMinutes, Tag

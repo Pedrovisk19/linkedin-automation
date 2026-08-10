@@ -4,6 +4,7 @@ Revision ID: 0002_journal
 Revises: 0001_identity
 Create Date: 2026-08-06
 """
+
 from __future__ import annotations
 
 import sqlalchemy as sa
@@ -43,12 +44,26 @@ def upgrade() -> None:
         sa.Column("resolutions", sa.Text, nullable=False, server_default="[]"),
         sa.Column("next_steps", sa.Text, nullable=False, server_default=""),
         sa.Column("notes", sa.Text, nullable=False, server_default=""),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
     )
     op.create_index("ix_journal_entries_tenant_id", "journal_entries", ["tenant_id"])
-    op.create_index("ix_journal_entries_tenant_id_id", "journal_entries", ["tenant_id", "id"], unique=True)
-    op.create_index("ix_journal_entries_tenant_date", "journal_entries", ["tenant_id", "entry_date"])
+    op.create_index(
+        "ix_journal_entries_tenant_id_id", "journal_entries", ["tenant_id", "id"], unique=True
+    )
+    op.create_index(
+        "ix_journal_entries_tenant_date", "journal_entries", ["tenant_id", "entry_date"]
+    )
 
     op.create_table(
         "tags",
@@ -60,8 +75,18 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column("value", sa.String(40), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
     )
     op.create_index("ix_tags_tenant_id", "tags", ["tenant_id"])
     op.create_index("ix_tags_tenant_value", "tags", ["tenant_id", "value"], unique=True)
@@ -81,7 +106,9 @@ def upgrade() -> None:
             primary_key=True,
         ),
     )
-    op.create_index("ix_jet_entry_tag", "journal_entry_tags", ["journal_entry_id", "tag_id"], unique=True)
+    op.create_index(
+        "ix_jet_entry_tag", "journal_entry_tags", ["journal_entry_id", "tag_id"], unique=True
+    )
 
     bind.execute(sa.text("ALTER TABLE journal_entries ENABLE ROW LEVEL SECURITY"))
     bind.execute(sa.text("ALTER TABLE tags ENABLE ROW LEVEL SECURITY"))

@@ -7,15 +7,17 @@
   output_summary, full_output_path opcional). Persistida p/ auditoria.
 - MemoryFragment: trecho persistido (content + embedding) p/ contexto anti-repeticao.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
 
-from developer_brain_ai_ai.domain.value_objects import AgentName, PromptName, PromptVersion
 from developer_brain_ai_shared.kernel import AggregateRoot
 from developer_brain_ai_shared.kernel.id import TenantId
 from developer_brain_ai_shared.kernel.timestamp import Timestamps
+
+from developer_brain_ai_ai.domain.value_objects import AgentName, PromptName, PromptVersion
 
 
 @dataclass(eq=False)
@@ -70,4 +72,4 @@ class MemoryFragment(AggregateRoot):
             raise ValueError("source_module excede 40 chars")
 
 
-__all__ = ["PromptTemplate", "AgentRun", "MemoryFragment"]
+__all__ = ["AgentRun", "MemoryFragment", "PromptTemplate"]

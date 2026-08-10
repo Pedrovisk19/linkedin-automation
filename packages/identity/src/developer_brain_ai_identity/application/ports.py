@@ -1,4 +1,5 @@
 """Application ports do identity. Interfaces para Clock (tempo injetavel)."""
+
 from __future__ import annotations
 
 from datetime import datetime

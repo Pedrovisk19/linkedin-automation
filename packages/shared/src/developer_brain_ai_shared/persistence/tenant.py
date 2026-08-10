@@ -9,6 +9,7 @@ Por que contextvars? Async-safe, propagado por await; mais correto que
 threadlocal no asyncio. Para process fork (Arq) o worker seta o tenant no
 modulo do job manualmente via ``set_tenant_context``.
 """
+
 from __future__ import annotations
 
 from contextvars import ContextVar
@@ -46,9 +47,9 @@ def reset_tenant_context() -> None:
 
 
 __all__ = [
-    "set_tenant_context",
     "get_tenant_context",
     "get_tenant_context_optional",
     "require_tenant_or_403",
     "reset_tenant_context",
+    "set_tenant_context",
 ]

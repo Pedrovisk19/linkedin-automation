@@ -1,8 +1,6 @@
 """Testes dos erros de dominio + tradutor HTTP."""
-from __future__ import annotations
 
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
+from __future__ import annotations
 
 from developer_brain_ai_shared.errors import (
     ConflictError,
@@ -13,6 +11,8 @@ from developer_brain_ai_shared.errors import (
     ValidationError,
 )
 from developer_brain_ai_shared.errors.http import mount_domain_error_handlers
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
 
 
 def test_error_to_dict_structure() -> None:

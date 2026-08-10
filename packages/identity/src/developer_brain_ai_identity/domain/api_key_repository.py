@@ -1,10 +1,12 @@
 """Repository interface para ApiKey + dto para autenticacao por chave."""
+
 from __future__ import annotations
 
 from typing import Protocol
 
-from developer_brain_ai_identity.domain.api_key import ApiKey
 from developer_brain_ai_shared.kernel.id import ApiKeyId, TenantId, UserId
+
+from developer_brain_ai_identity.domain.api_key import ApiKey
 
 
 class ApiKeyRepository(Protocol):

@@ -6,6 +6,7 @@ Cobre:
 - __aexit__ com exc=None commit; com exc rollback.
 - commit_and_publish coleta eventos dos aggregates.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -13,14 +14,13 @@ from dataclasses import dataclass
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-
 from developer_brain_ai_shared.events import EventDispatcher
+from developer_brain_ai_shared.events.base import DomainEvent
 from developer_brain_ai_shared.kernel import AggregateRoot, TenantId
 from developer_brain_ai_shared.kernel.id import UserId
-from developer_brain_ai_shared.events.base import DomainEvent
 from developer_brain_ai_shared.persistence import (
-    set_tenant_context,
     reset_tenant_context,
+    set_tenant_context,
 )
 from developer_brain_ai_shared.persistence.session import UnitOfWork
 

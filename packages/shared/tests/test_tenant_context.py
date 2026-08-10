@@ -1,16 +1,16 @@
 """Testes do TenantContext (contextvars) — puros, sem DB."""
+
 from __future__ import annotations
 
 import pytest
-
 from developer_brain_ai_shared.errors import ForbiddenError, UnauthorizedError
+from developer_brain_ai_shared.kernel import TenantId
 from developer_brain_ai_shared.persistence import (
     get_tenant_context,
     get_tenant_context_optional,
     reset_tenant_context,
     set_tenant_context,
 )
-from developer_brain_ai_shared.kernel import TenantId
 
 
 def test_default_context_is_none() -> None:

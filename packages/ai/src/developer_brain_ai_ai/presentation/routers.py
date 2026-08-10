@@ -1,4 +1,5 @@
 """Routers do modulo ai. SEM `from __future__ import annotations` (ADR-0012)."""
+
 from typing import Annotated
 
 from fastapi import APIRouter, Depends

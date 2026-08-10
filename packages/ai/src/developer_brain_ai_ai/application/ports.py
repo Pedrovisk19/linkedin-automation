@@ -1,4 +1,5 @@
 """Application ports: AIProvider (chat/embed/stream), MemoryService (anti-repetition)."""
+
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
@@ -43,7 +44,7 @@ class AIProvider(Protocol):
 
     async def chat(self, request: ChatRequest) -> ChatResponse: ...
 
-    async def chat_stream(self, request: ChatRequest) -> AsyncIterator[str]: ...
+    def chat_stream(self, request: ChatRequest) -> AsyncIterator[str]: ...
 
     async def embed(self, text: str) -> EmbedResponse: ...
 

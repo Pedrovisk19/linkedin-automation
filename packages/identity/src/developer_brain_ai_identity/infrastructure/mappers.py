@@ -2,10 +2,11 @@
 
 Mantém dominio agnostico a SQLAlchemy: a camada infrastructure converte.
 """
+
 from __future__ import annotations
 
-import uuid
-from datetime import datetime
+from developer_brain_ai_shared.kernel.id import ApiKeyId, TenantId, UserId
+from developer_brain_ai_shared.kernel.timestamp import Timestamps
 
 from developer_brain_ai_identity.domain.api_key import ApiKey
 from developer_brain_ai_identity.domain.tenant import Tenant
@@ -16,9 +17,6 @@ from developer_brain_ai_identity.domain.value_objects import (
     TenantSlug,
     UserRole,
 )
-from developer_brain_ai_shared.kernel.id import ApiKeyId, TenantId, UserId
-from developer_brain_ai_shared.kernel.timestamp import Timestamps
-
 from developer_brain_ai_identity.infrastructure.orm import ApiKeyORM, TenantORM, UserORM
 
 
@@ -100,10 +98,10 @@ def api_key_from_orm(o: ApiKeyORM) -> ApiKey:
 
 
 __all__ = [
-    "tenant_to_orm",
-    "tenant_from_orm",
-    "user_to_orm",
-    "user_from_orm",
-    "api_key_to_orm",
     "api_key_from_orm",
+    "api_key_to_orm",
+    "tenant_from_orm",
+    "tenant_to_orm",
+    "user_from_orm",
+    "user_to_orm",
 ]

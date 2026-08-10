@@ -6,16 +6,13 @@ Defensas implementadas:
   erro de schema.
 - Tokens contabilizados p/ observabilidade.
 """
+
 from __future__ import annotations
 
-import json
 from collections.abc import AsyncIterator
 from typing import Any
 
-from pydantic import BaseModel
-
 from developer_brain_ai_ai.application.ports import (
-    ChatMessage,
     ChatRequest,
     ChatResponse,
     EmbedResponse,
@@ -48,11 +45,14 @@ class OpenAIProvider:
             kwargs["max_tokens"] = request.max_tokens
         if request.response_format is not None:
             schema = request.response_format.model_json_schema()
-            kwargs["response_format"] = {"type": "json_schema", "json_schema": {
-                "name": request.response_format.__name__,
-                "schema": schema,
-                "strict": False,
-            }}
+            kwargs["response_format"] = {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": request.response_format.__name__,
+                    "schema": schema,
+                    "strict": False,
+                },
+            }
 
         resp = await self._client.chat.completions.create(**kwargs)
         choice = resp.choices[0]

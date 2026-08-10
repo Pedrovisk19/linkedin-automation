@@ -1,8 +1,8 @@
 """Testes unitarios dos use cases do journal com repo fake."""
+
 from __future__ import annotations
 
 import pytest
-
 from developer_brain_ai_journal.application.dto import (
     CreateJournalEntryInput,
     UpdateJournalEntryInput,
@@ -16,7 +16,6 @@ from developer_brain_ai_journal.application.use_cases import (
 )
 from developer_brain_ai_shared.errors.base import NotFoundError, ValidationError
 from developer_brain_ai_shared.kernel.id import TenantId
-
 from journal_fakes import FakeJournalEntryRepository
 
 
@@ -108,8 +107,12 @@ def test_list_filters_by_technology() -> None:
 
     repo = FakeJournalEntryRepository()
     tenant = TenantId.new()
-    asyncio.run(CreateJournalEntry(repo).execute(tenant, _create_input(technologies=["rust", "tokio"])))
-    asyncio.run(CreateJournalEntry(repo).execute(tenant, _create_input(title="Go", technologies=["go"])))
+    asyncio.run(
+        CreateJournalEntry(repo).execute(tenant, _create_input(technologies=["rust", "tokio"]))
+    )
+    asyncio.run(
+        CreateJournalEntry(repo).execute(tenant, _create_input(title="Go", technologies=["go"]))
+    )
 
     out, n = asyncio.run(ListJournalEntries(repo).execute(tenant, technology="rust"))
     assert n == 1

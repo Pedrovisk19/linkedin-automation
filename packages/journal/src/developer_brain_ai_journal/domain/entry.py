@@ -16,10 +16,14 @@ Invariantes:
 - study_minutes >= 0 (validado por StudyMinutes).
 - tags unicas (case-insensitive pos-normalizacao).
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import date
+
+from developer_brain_ai_shared.kernel import AggregateRoot
+from developer_brain_ai_shared.kernel.id import TenantId
+from developer_brain_ai_shared.kernel.timestamp import Timestamps
 
 from developer_brain_ai_journal.domain.events import (
     JournalEntryCreated,
@@ -28,9 +32,6 @@ from developer_brain_ai_journal.domain.events import (
 )
 from developer_brain_ai_journal.domain.ids import JournalEntryId
 from developer_brain_ai_journal.domain.value_objects import EntryDate, StudyMinutes, Tag
-from developer_brain_ai_shared.kernel import AggregateRoot
-from developer_brain_ai_shared.kernel.id import TenantId
-from developer_brain_ai_shared.kernel.timestamp import Timestamps
 
 
 def _dedupe_tags(tags: list[Tag]) -> list[Tag]:
@@ -131,7 +132,11 @@ class JournalEntry(AggregateRoot):
         for k, v in fields.items():
             object.__setattr__(self, k, v)
 
-        if "bugs_found" in fields and "resolutions" in fields and len(self.bugs_found) != len(self.resolutions):
+        if (
+            "bugs_found" in fields
+            and "resolutions" in fields
+            and len(self.bugs_found) != len(self.resolutions)
+        ):
             raise ValueError("bugs_found e resolutions devem ter mesmo tamanho")
         if "tags" in fields:
             raw = fields["tags"]

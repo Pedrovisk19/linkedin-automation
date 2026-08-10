@@ -23,5 +23,4 @@ fixable = ["ALL"]
 "docs/**/*"  = ["E501"]
 
 [format]
-line-length = 100
 docstring-code-format = true

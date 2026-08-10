@@ -1,10 +1,10 @@
 """Testes dos use cases do identity com repos fakes (sem IO)."""
+
 from __future__ import annotations
 
 import asyncio
 
 import pytest
-
 from developer_brain_ai_identity.application.dto import (
     CreateApiKeyInput,
     LoginInput,
@@ -21,7 +21,6 @@ from developer_brain_ai_identity.application.use_cases.refresh_token import Refr
 from developer_brain_ai_identity.application.use_cases.register_tenant import RegisterTenant
 from developer_brain_ai_shared.auth.jwt import JWTService
 from developer_brain_ai_shared.errors.base import ConflictError, NotFoundError, UnauthorizedError
-
 from identity_fakes import (
     FakeApiKeyRepository,
     FakePasswordHasher,
@@ -64,7 +63,16 @@ def test_register_tenant_creates_tenant_and_admin_user() -> None:
     )
     assert out.email == "admin@acme.com"
     assert out.tenant_id and out.user_id
-    assert asyncio.run(tenants.slug_exists(__import__("developer_brain_ai_identity.domain.value_objects", fromlist=["TenantSlug"]).TenantSlug("acme"))) is True
+    assert (
+        asyncio.run(
+            tenants.slug_exists(
+                __import__(
+                    "developer_brain_ai_identity.domain.value_objects", fromlist=["TenantSlug"]
+                ).TenantSlug("acme")
+            )
+        )
+        is True
+    )
 
 
 def test_register_tenant_rejects_dup_slug() -> None:
@@ -156,11 +164,7 @@ def test_login_success_returns_token_pair() -> None:
 def test_login_unknown_tenant_unified_error() -> None:
     uc = _login_uc(FakeTenantRepository(), FakeUserRepository())
     with pytest.raises(UnauthorizedError):
-        asyncio.run(
-            uc.execute(
-                LoginInput(tenant_slug="ghost", email="a@b.com", password="x" * 12)
-            )
-        )
+        asyncio.run(uc.execute(LoginInput(tenant_slug="ghost", email="a@b.com", password="x" * 12)))
 
 
 def test_login_unknown_user_unified_error() -> None:
@@ -220,7 +224,13 @@ def test_login_suspended_user_unified_error() -> None:
             )
         )
     )
-    u = asyncio.run(users.get_by_email(__import__("developer_brain_ai_identity.domain.value_objects", fromlist=["Email"]).Email("admin@acme.com")))
+    u = asyncio.run(
+        users.get_by_email(
+            __import__(
+                "developer_brain_ai_identity.domain.value_objects", fromlist=["Email"]
+            ).Email("admin@acme.com")
+        )
+    )
     u.suspend()
     asyncio.run(users.save(u))
 
@@ -263,9 +273,7 @@ def test_create_api_key_returns_display_once() -> None:
     from developer_brain_ai_shared.kernel.id import TenantId, UserId
 
     tid, uid = TenantId.new(), UserId.new()
-    out = asyncio.run(
-        CreateApiKey(repo).execute(tid, uid, CreateApiKeyInput(label="laptop"))
-    )
+    out = asyncio.run(CreateApiKey(repo).execute(tid, uid, CreateApiKeyInput(label="laptop")))
     assert out.key_display.startswith("dba_")
     assert "." in out.key_display
     assert out.label == "laptop"
@@ -294,7 +302,13 @@ def test_revoke_api_key_marks_revoked() -> None:
     tid, uid = TenantId.new(), UserId.new()
     out = asyncio.run(CreateApiKey(repo).execute(tid, uid, CreateApiKeyInput(label="x")))
     asyncio.run(RevokeApiKey(repo).execute(out.api_key_id))
-    key = asyncio.run(repo.get_by_id(__import__("developer_brain_ai_shared.kernel.id", fromlist=["ApiKeyId"]).ApiKeyId(out.api_key_id)))
+    key = asyncio.run(
+        repo.get_by_id(
+            __import__("developer_brain_ai_shared.kernel.id", fromlist=["ApiKeyId"]).ApiKeyId(
+                out.api_key_id
+            )
+        )
+    )
     assert key is not None and key.is_revoked is True
 
 

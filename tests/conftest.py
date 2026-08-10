@@ -1,4 +1,5 @@
 """Root pytest config: caminhos, fixtures compartilhadas, markers globais."""
+
 from __future__ import annotations
 
 import os

@@ -1,4 +1,5 @@
 """Testes do Kernel extras: metodos no cobertos (clear_events, __hash__, as_uuid, lt)."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

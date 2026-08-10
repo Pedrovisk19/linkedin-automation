@@ -3,13 +3,8 @@
 Reaproveita JWTService real; apenas repositories sao fakeados. Mantem context
 de tenant entre requests via set_tenant_context (feito pelo Depends current_user).
 """
+
 from __future__ import annotations
-
-from unittest.mock import MagicMock
-
-import pytest
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
 
 from developer_brain_ai_identity.presentation.dependencies import get_current_user_factory
 from developer_brain_ai_journal.application.use_cases import (
@@ -22,7 +17,8 @@ from developer_brain_ai_journal.application.use_cases import (
 from developer_brain_ai_journal.presentation.routers import build_router
 from developer_brain_ai_shared.auth.jwt import JWTService
 from developer_brain_ai_shared.errors.http import mount_domain_error_handlers
-
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
 from journal_fakes import FakeJournalEntryRepository
 
 SECRET = "test-secret-please-replace-me-12345678901234567890"
@@ -106,8 +102,9 @@ def test_create_rejects_with_422_invalid_payload() -> None:
 
 def test_create_rejects_future_entry_date() -> None:
     app = _build_app()
-    from developer_brain_ai_shared.kernel.id import TenantId, UserId
     from datetime import date, timedelta
+
+    from developer_brain_ai_shared.kernel.id import TenantId, UserId
 
     token = _make_token(str(TenantId.new()), str(UserId.new()))
     bad = dict(ENTRY_PAYLOAD)
@@ -233,6 +230,8 @@ def test_isolation_between_tenants_in_http() -> None:
     t1 = _make_token(str(TenantId.new()), str(UserId.new()))
     t2 = _make_token(str(TenantId.new()), str(UserId.new()))
     with TestClient(app) as c:
-        eid = c.post("/journals", json=ENTRY_PAYLOAD, headers={"Authorization": f"Bearer {t1}"}).json()["id"]
+        eid = c.post(
+            "/journals", json=ENTRY_PAYLOAD, headers={"Authorization": f"Bearer {t1}"}
+        ).json()["id"]
         r = c.get(f"/journals/{eid}", headers={"Authorization": f"Bearer {t2}"})
     assert r.status_code == 404

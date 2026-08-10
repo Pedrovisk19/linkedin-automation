@@ -1,4 +1,5 @@
 """PromptEngine: le prompts/*.md do FS, cacheia por sha256, renderiza variaveis."""
+
 from __future__ import annotations
 
 from functools import lru_cache

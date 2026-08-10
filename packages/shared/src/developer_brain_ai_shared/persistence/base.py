@@ -7,6 +7,7 @@ Importante: este modulo pode importar SQLAlchemy (camada de infra), porem NUNCA
 e importado por ``domain``. A separacao entre ``domain`` (puro) e ``infra ORM``
 e garantida por testes de arquitetura (Fase 1).
 """
+
 from __future__ import annotations
 
 import uuid

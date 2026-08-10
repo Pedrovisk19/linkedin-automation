@@ -6,6 +6,7 @@
 - UserRole: enum ADMIN | MEMBER.
 - ApiKeyPlain: valor legivel gerado uma unica vez; prefixo + segredo.
 """
+
 from __future__ import annotations
 
 import re
@@ -83,4 +84,4 @@ class ApiKeyPlain:
         return hashlib.sha256(self.display.encode()).hexdigest()
 
 
-__all__ = ["Email", "TenantSlug", "PasswordHash", "UserRole", "ApiKeyPlain"]
+__all__ = ["ApiKeyPlain", "Email", "PasswordHash", "TenantSlug", "UserRole"]

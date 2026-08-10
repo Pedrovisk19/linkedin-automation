@@ -1,4 +1,5 @@
 """Application layer do journal: DTOs + use cases."""
+
 from developer_brain_ai_journal.application.dto import (
     CreateJournalEntryInput,
     JournalEntryOut,
@@ -13,12 +14,12 @@ from developer_brain_ai_journal.application.use_cases import (
 )
 
 __all__ = [
-    "CreateJournalEntryInput",
-    "UpdateJournalEntryInput",
-    "JournalEntryOut",
     "CreateJournalEntry",
+    "CreateJournalEntryInput",
+    "DeleteJournalEntry",
     "GetJournalEntry",
+    "JournalEntryOut",
     "ListJournalEntries",
     "UpdateJournalEntry",
-    "DeleteJournalEntry",
+    "UpdateJournalEntryInput",
 ]

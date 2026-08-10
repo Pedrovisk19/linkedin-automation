@@ -4,13 +4,12 @@ Justificativa: passlib quebrou em bcrypt>=4 + Python 3.14 (`module 'bcrypt' has 
 Usar bcrypt direto e mais robusto e remove a dependencia quebrada. Mantemos o
 PasswordHasher Protocol — callers nao mudam.
 """
+
 from __future__ import annotations
 
 from datetime import UTC, datetime
 
 import bcrypt
-
-from developer_brain_ai_shared.auth.password import PasswordHasher
 
 _BCRYPT_MAX_PWD = 72
 
@@ -27,7 +26,7 @@ class BcryptPasswordHasher:
     def verify(self, plain: str, hashed: str) -> bool:
         try:
             return bcrypt.checkpw(plain[:_BCRYPT_MAX_PWD].encode("utf-8"), hashed.encode("utf-8"))
-        except (ValueError, TypeError):
+        except ValueError, TypeError:
             return False
 
 

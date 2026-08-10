@@ -1,14 +1,13 @@
 """Fakes reutilizaveis para testes do identity (sem DB, sem passlib)."""
+
 from __future__ import annotations
 
-import hashlib
 from collections import defaultdict
 
 from developer_brain_ai_identity.domain.api_key import ApiKey
 from developer_brain_ai_identity.domain.tenant import Tenant
 from developer_brain_ai_identity.domain.user import User
 from developer_brain_ai_identity.domain.value_objects import Email, TenantSlug
-from developer_brain_ai_shared.auth.password import PasswordHasher
 from developer_brain_ai_shared.kernel.id import ApiKeyId, TenantId, UserId
 
 
@@ -92,4 +91,9 @@ class FakeApiKeyRepository:
             k.revoke()
 
 
-__all__ = ["FakePasswordHasher", "FakeTenantRepository", "FakeUserRepository", "FakeApiKeyRepository"]
+__all__ = [
+    "FakeApiKeyRepository",
+    "FakePasswordHasher",
+    "FakeTenantRepository",
+    "FakeUserRepository",
+]

@@ -1,4 +1,5 @@
 """DTOs de apresentacao do ai (routers)."""
+
 from __future__ import annotations
 
 from datetime import date

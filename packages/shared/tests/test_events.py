@@ -1,10 +1,10 @@
 """Testes do EventDispatcher (sincrono + async handlers)."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
 
 import pytest
-
 from developer_brain_ai_shared.events import DomainEvent, EventDispatcher
 
 

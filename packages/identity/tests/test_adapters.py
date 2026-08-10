@@ -1,4 +1,5 @@
 """Testes de infraestrutura do identity: bcrypt + clock (sem DB)."""
+
 from __future__ import annotations
 
 from datetime import UTC, datetime

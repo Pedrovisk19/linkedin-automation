@@ -1,16 +1,16 @@
 """Mappers ORM <-> JournalEntry. Listas serializam como JSON em colunas TEXT."""
+
 from __future__ import annotations
 
 import json
-import uuid
-from datetime import date
+
+from developer_brain_ai_shared.kernel.id import TenantId
+from developer_brain_ai_shared.kernel.timestamp import Timestamps
 
 from developer_brain_ai_journal.domain.entry import JournalEntry
 from developer_brain_ai_journal.domain.ids import JournalEntryId
 from developer_brain_ai_journal.domain.value_objects import EntryDate, StudyMinutes, Tag
 from developer_brain_ai_journal.infrastructure.orm import JournalEntryORM
-from developer_brain_ai_shared.kernel.id import TenantId
-from developer_brain_ai_shared.kernel.timestamp import Timestamps
 
 
 def _jdump(value: list[str]) -> str:
@@ -24,7 +24,7 @@ def _jload(value: str | list[str]) -> list[str]:
         return []
     try:
         return json.loads(value)
-    except (json.JSONDecodeError, TypeError):
+    except json.JSONDecodeError, TypeError:
         return []
 
 
@@ -77,4 +77,4 @@ def entry_from_orm(o: JournalEntryORM, tag_values: list[str] | None = None) -> J
     )
 
 
-__all__ = ["entry_to_orm", "entry_from_orm"]
+__all__ = ["entry_from_orm", "entry_to_orm"]

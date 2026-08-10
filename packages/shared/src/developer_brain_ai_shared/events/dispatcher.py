@@ -4,6 +4,7 @@ Domain puro: nao conhece filas/HTTP. Apenas acumula handlers in-memory aqui p/
 testes. Em producao o composition root registra um AsyncEventDispatcher que
 publica em uma outbox (Fase 11).
 """
+
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable

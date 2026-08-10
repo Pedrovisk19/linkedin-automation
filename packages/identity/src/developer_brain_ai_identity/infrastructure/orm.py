@@ -3,19 +3,19 @@
 - TenantORM: SEM tenant_id (e a propria raiz do tenant). Visivel p/ lookup por slug.
 - UserORM, ApiKeyORM: usam TenantScopedMixin (RLS por tenant_id).
 """
+
 from __future__ import annotations
 
 import uuid
 from datetime import datetime
-
-from sqlalchemy import Boolean, DateTime, ForeignKey, Index, String, Uuid, func
-from sqlalchemy.orm import Mapped, mapped_column
 
 from developer_brain_ai_shared.persistence.base import (
     Base,
     TenantScopedMixin,
     TimestampMixin,
 )
+from sqlalchemy import Boolean, DateTime, ForeignKey, Index, String, Uuid
+from sqlalchemy.orm import Mapped, mapped_column
 
 
 class TenantORM(TimestampMixin, Base):
@@ -61,4 +61,4 @@ class ApiKeyORM(TenantScopedMixin, TimestampMixin, Base):
     is_revoked: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
 
-__all__ = ["TenantORM", "UserORM", "ApiKeyORM"]
+__all__ = ["ApiKeyORM", "TenantORM", "UserORM"]

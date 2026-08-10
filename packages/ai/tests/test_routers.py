@@ -1,13 +1,12 @@
 """Testes e2e do router /ai/summary via TestClient + DI real + FakeAIProvider + fake journal resolver."""
+
 from __future__ import annotations
 
-import asyncio
 import json
 from datetime import date
+from pathlib import Path
 
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
-
+from ai_fakes import FakeAgentRunRepository, FakeAIProvider
 from developer_brain_ai_ai.application.prompt_engine import PromptEngine
 from developer_brain_ai_ai.application.use_cases import SummaryAgent
 from developer_brain_ai_ai.presentation.routers import build_router
@@ -15,9 +14,8 @@ from developer_brain_ai_identity.presentation.dependencies import get_current_us
 from developer_brain_ai_shared.auth.jwt import JWTService
 from developer_brain_ai_shared.errors.http import mount_domain_error_handlers
 from developer_brain_ai_shared.kernel.id import TenantId, UserId
-from pathlib import Path
-
-from ai_fakes import FakeAIProvider, FakeAgentRunRepository
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
 
 SECRET = "test-secret-please-replace-me-12345678901234567890"
 PROMPTS = Path(__file__).resolve().parents[3] / "prompts"
@@ -77,7 +75,10 @@ def _make_token(tenant_id: str, user_id: str) -> str:
 def test_summary_protected_requires_bearer() -> None:
     app = _build_app([])
     with TestClient(app) as c:
-        r = c.post("/ai/summary", json={"period_kind": "weekly", "start_date": "2026-08-01", "end_date": "2026-08-07"})
+        r = c.post(
+            "/ai/summary",
+            json={"period_kind": "weekly", "start_date": "2026-08-01", "end_date": "2026-08-07"},
+        )
     assert r.status_code == 401
 
 

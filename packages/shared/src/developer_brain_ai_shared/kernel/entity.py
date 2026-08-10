@@ -7,10 +7,11 @@ Regras:
 - Entidades NUNCA importam SQLAlchemy, FastAPI ou OpenAI.
 - Domain events sao dataclasses puras; o dispatcher fica em application/shared.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from developer_brain_ai_shared.events.base import DomainEvent
@@ -34,12 +35,12 @@ class Entity:
 class AggregateRoot(Entity):
     """Raiz de agregado. Mantem eventos pendentes para publicacao no UoW."""
 
-    _events: list["DomainEvent"] = field(default_factory=list, init=False, repr=False)
+    _events: list[DomainEvent] = field(default_factory=list, init=False, repr=False)
 
-    def record_event(self, event: "DomainEvent") -> None:
+    def record_event(self, event: DomainEvent) -> None:
         self._events.append(event)
 
-    def pull_events(self) -> list["DomainEvent"]:
+    def pull_events(self) -> list[DomainEvent]:
         eventos, self._events = self._events, []
         return eventos
 
@@ -47,8 +48,8 @@ class AggregateRoot(Entity):
         self._events.clear()
 
     @property
-    def pending_events(self) -> tuple["DomainEvent", ...]:
+    def pending_events(self) -> tuple[DomainEvent, ...]:
         return tuple(self._events)
 
 
-__all__ = ["Entity", "AggregateRoot"]
+__all__ = ["AggregateRoot", "Entity"]
