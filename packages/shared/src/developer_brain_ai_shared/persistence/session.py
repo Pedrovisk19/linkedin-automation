@@ -20,6 +20,7 @@ funcionar tambem para repos que abrem sessao propria e para jobs do Arq worker
 
 from __future__ import annotations
 
+import re
 from collections.abc import AsyncIterator, Callable
 from typing import Protocol
 
@@ -103,6 +104,18 @@ class UnitOfWork:
         return self._events_published
 
 
+def ensure_asyncpg_url(url: str) -> str:
+    """Ajusta URL de banco para o driver asyncpg (dialeto ``postgresql+asyncpg``).
+
+    - Connection strings do dashboard do Neon/RDS/Heroku vem como
+      ``postgresql://``; o SQLAlchemy escolheria psycopg2 (nao instalado).
+    - O parametro ``sslmode=`` e do libpq; o asyncpg usa ``ssl=``.
+    """
+    if url.startswith("postgresql://"):
+        url = f"postgresql+asyncpg://{url[len('postgresql://') :]}"
+    return re.sub(r"sslmode=([a-zA-Z0-9_-]+)", r"ssl=\1", url)
+
+
 class EngineFactory:
     """Helper para construir engine + session factory com retry basico e RLS por transacao."""
 
@@ -116,7 +129,7 @@ class EngineFactory:
 
         engine = async_engine_from_config(
             {
-                "sqlalchemy.url": url,
+                "sqlalchemy.url": ensure_asyncpg_url(url),
                 "sqlalchemy.pool_size": pool_size,
                 "sqlalchemy.max_overflow": max_overflow,
                 "sqlalchemy.pool_pre_ping": pool_pre_ping,

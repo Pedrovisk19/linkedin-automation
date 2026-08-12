@@ -29,6 +29,7 @@ import developer_brain_ai_news.infrastructure.orm  # noqa: F401
 import developer_brain_ai_telegram.infrastructure.orm  # noqa: F401
 from alembic import context
 from developer_brain_ai_shared.persistence.base import Base
+from developer_brain_ai_shared.persistence.session import ensure_asyncpg_url
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
@@ -42,7 +43,9 @@ target_metadata = Base.metadata
 
 def _database_url() -> str:
     """URL do banco: prioriza DATABASE_URL (CI/cron), senao alembic.ini."""
-    return os.environ.get("DATABASE_URL") or config.get_main_option("sqlalchemy.url")
+    return ensure_asyncpg_url(
+        os.environ.get("DATABASE_URL") or config.get_main_option("sqlalchemy.url")
+    )
 
 
 def run_migrations_offline() -> None:

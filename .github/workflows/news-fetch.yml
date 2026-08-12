@@ -34,5 +34,8 @@ jobs:
       - name: Migrate DB
         run: uv run alembic upgrade head
 
+      - name: Seed tenant
+        run: uv run --directory apps/worker python -m app.seed_tenant
+
       - name: Fetch news sources
         run: uv run --directory apps/worker python -m app.run_news fetch
