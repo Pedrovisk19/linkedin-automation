@@ -9,13 +9,18 @@ cd "$REPO_DIR"
 echo "=== Deploy GCP e2-micro — API + Discord bot ==="
 
 # ---- Swap (e2-micro tem 1GB RAM; build precisa de mais) ----------------------
-if ! swapon --show | grep -q swapfile; then
-  echo "[swap] criando 2GB de swap..."
-  sudo fallocate -l 2G /swapfile
-  sudo chmod 600 /swapfile
-  sudo mkswap /swapfile
-  sudo swapon /swapfile
-  echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab >/dev/null
+if ! sudo swapon --show 2>/dev/null | grep -q swap; then
+  if [ ! -f /swapfile ]; then
+    echo "[swap] criando 2GB de swap..."
+    sudo fallocate -l 2G /swapfile
+    sudo chmod 600 /swapfile
+    sudo mkswap /swapfile
+    sudo swapon /swapfile
+    echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab >/dev/null
+  else
+    echo "[swap] /swapfile ja existe; ativando..."
+    sudo swapon /swapfile 2>/dev/null || true
+  fi
 fi
 
 # ---- Docker ------------------------------------------------------------------
