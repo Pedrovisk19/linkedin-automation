@@ -36,10 +36,7 @@ jobs:
         run: uv sync --all-extras --all-packages
 
       - name: Migrate DB
-        run: |
-          echo "DATABASE_URL length: ${#DATABASE_URL}"
-          uv run python -c "import os; v=os.environ.get('DATABASE_URL',''); print('env sees:', len(v), 'chars, starts:', v[:20] if v else 'EMPTY')"
-          uv run alembic upgrade head
+        run: uv run alembic upgrade head
 
       - name: Seed tenant
         run: uv run --directory apps/worker python -m app.seed_tenant
