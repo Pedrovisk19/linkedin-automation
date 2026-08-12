@@ -1,0 +1,41 @@
+name: News Digest (cron 08:00 UTC)
+
+on:
+  schedule:
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
+      OPENAI_CHAT_MODEL: ${{ secrets.OPENAI_CHAT_MODEL }}
+      NEWS_TENANT_ID: ${{ secrets.NEWS_TENANT_ID }}
+      DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+      DISCORD_ALLOWED_CHANNEL_ID: ${{ secrets.DISCORD_ALLOWED_CHANNEL_ID }}
+      DISCORD_TENANT_ID: ${{ secrets.DISCORD_TENANT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.14
+
+      - name: Sync dependencies
+        run: uv sync --all-extras
+
+      - name: Migrate DB
+        run: uv run alembic upgrade head
+
+      - name: Fetch + generate digest (envia p/ Discord)
+        run: uv run --directory apps/worker python -m app.run_news digest

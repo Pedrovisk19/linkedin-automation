@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import time
 from datetime import date, timedelta
 
 import pytest
@@ -50,14 +51,14 @@ def test_entry_date_accepts_today_and_past() -> None:
 
 # === JournalEntry ===
 def _build_entry(**overrides) -> JournalEntry:
-    base = dict(
-        id=JournalEntryId.new(),
-        tenant_id=TenantId.new(),
-        title="Diario do dia",
-        entry_date=EntryDate(date.today()),
-        study_minutes=StudyMinutes(120),
-        timestamps=_ts(),
-    )
+    base = {
+        "id": JournalEntryId.new(),
+        "tenant_id": TenantId.new(),
+        "title": "Diario do dia",
+        "entry_date": EntryDate(date.today()),
+        "study_minutes": StudyMinutes(120),
+        "timestamps": _ts(),
+    }
     base.update(overrides)
     return JournalEntry.create(**base)
 
@@ -105,7 +106,6 @@ def test_rejects_empty_link_in_list() -> None:
 
 def test_update_emits_updated_event_and_touches_timestamp() -> None:
     e = _build_entry(title="Old")
-    import time
 
     time.sleep(0.01)
     e.update(title="New", technologies=["fastapi"])

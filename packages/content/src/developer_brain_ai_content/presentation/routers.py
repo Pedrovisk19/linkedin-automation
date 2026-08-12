@@ -3,6 +3,10 @@
 from datetime import datetime
 from typing import Annotated
 
+from developer_brain_ai_identity.presentation.dependencies import (
+    CurrentUser,
+    CurrentUserDependency,
+)
 from fastapi import APIRouter, Body, Depends
 
 from developer_brain_ai_content.application.dto import (
@@ -30,10 +34,9 @@ def build_router(
     enqueue_uc: EnqueueDraft,
     mark_published_uc: MarkPublished,
     reject_uc: RejectDraft,
-    current_user_dep,
+    current_user_dep: CurrentUserDependency,
     generate_linkedin_uc: GenerateLinkedInDraft | None = None,
 ) -> APIRouter:
-    from developer_brain_ai_identity.presentation.dependencies import CurrentUser
 
     UserDep = Annotated[CurrentUser, Depends(current_user_dep)]
     router = APIRouter(prefix="/content", tags=["content"])
@@ -82,8 +85,7 @@ def build_router(
 
     @router.post("/drafts/{draft_id}/publish", status_code=200)
     async def publish(current: UserDep, draft_id: str) -> dict[str, str]:
-        await mark_published_uc.execute(current.tenant_id, draft_id)
-        return {"status": "published"}
+        return await mark_published_uc.execute(current.tenant_id, draft_id)
 
     @router.post("/drafts/{draft_id}/reject", status_code=200)
     async def reject(

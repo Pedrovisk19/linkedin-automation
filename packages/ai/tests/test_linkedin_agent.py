@@ -8,7 +8,7 @@ from pathlib import Path
 
 from ai_fakes import FakeAgentRunRepository, FakeAIProvider
 from developer_brain_ai_ai.application.prompt_engine import PromptEngine
-from developer_brain_ai_ai.application.use_cases import LinkedInAgent
+from developer_brain_ai_ai.application.use_cases import LinkedInAgent, LinkedInAgentConfig
 from developer_brain_ai_shared.kernel.id import TenantId
 
 PROMPTS = Path(__file__).resolve().parents[3] / "prompts"
@@ -106,7 +106,6 @@ def test_linkedin_empty_entries_emits_placeholder_in_prompt() -> None:
 
 
 def test_linkedin_passes_temperature_max_tokens_from_config() -> None:
-    from developer_brain_ai_ai.application.use_cases import LinkedInAgentConfig
 
     provider = FakeAIProvider(chat_response="{}")
     agent = LinkedInAgent(

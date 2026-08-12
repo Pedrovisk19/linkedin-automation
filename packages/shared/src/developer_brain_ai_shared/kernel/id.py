@@ -12,16 +12,19 @@ type-checker — bug de troca é pego em tempo de compilação.
 from __future__ import annotations
 
 import uuid
-from typing import Annotated, TypeAlias
+from typing import Annotated, Any, TypeVar
 
 from sqlalchemy import Uuid
 
-UUIDType: TypeAlias = Annotated[uuid.UUID, Uuid]
+type UUIDType = Annotated[uuid.UUID, Uuid]
+
+T_TypedId = TypeVar("T_TypedId", bound="TypedId[Any]")
 
 
-class TypedId:
+class TypedId[T_TypedId]:
     """Base para IDs tipados (UUID v4). Imutável e comparável por valor."""
 
+    _value: uuid.UUID
     __slots__ = ("_value",)
 
     def __init__(self, value: uuid.UUID | str) -> None:
@@ -34,12 +37,20 @@ class TypedId:
         object.__setattr__(self, "_value", value)
 
     @classmethod
-    def new(cls) -> TypedId:
-        return cls(uuid.uuid4())
+    def new(cls) -> T_TypedId:
+        """Gera um novo id UUID v4 com o tipo concreto da subclasse."""
+
+        return cls(uuid.uuid4())  # type: ignore[return-value]
+
+    @classmethod
+    def from_uuid(cls, value: uuid.UUID) -> T_TypedId:
+        """Reconstroi um id a partir de um UUID (mappers/ORM)."""
+
+        return cls(value)  # type: ignore[return-value]
 
     @property
     def value(self) -> uuid.UUID:
-        return self._value  # type: ignore[no-any-return]
+        return self._value
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, type(self)) and other._value == self._value
@@ -47,7 +58,7 @@ class TypedId:
     def __hash__(self) -> int:
         return hash((type(self).__name__, self._value))
 
-    def __lt__(self, other: TypedId) -> bool:
+    def __lt__(self, other: TypedId[Any]) -> bool:
         if not isinstance(other, type(self)):
             return NotImplemented
         return self._value < other._value
@@ -62,15 +73,15 @@ class TypedId:
         return self._value
 
 
-class TenantId(TypedId):
+class TenantId(TypedId["TenantId"]):
     """Identificador de tenant (multi-tenancy)."""
 
 
-class UserId(TypedId):
+class UserId(TypedId["UserId"]):
     """Identificador de usuário."""
 
 
-class ApiKeyId(TypedId):
+class ApiKeyId(TypedId["ApiKeyId"]):
     """Identificador de API key."""
 
 

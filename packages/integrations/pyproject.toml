@@ -3,7 +3,12 @@ name = "developer-brain-ai-integrations"
 version = "0.1.0"
 description = "Bounded context: integrations (Clean Architecture layers)."
 requires-python = ">=3.14"
-dependencies = ["developer-brain-ai-shared", "pydantic>=2.10"]
+dependencies = [
+  "developer-brain-ai-shared",
+  "httpx>=0.28",
+  "pydantic>=2.10",
+  "sqlalchemy[asyncio]>=2.0.36",
+]
 
 [tool.uv.sources]
 developer-brain-ai-shared = { workspace = true }

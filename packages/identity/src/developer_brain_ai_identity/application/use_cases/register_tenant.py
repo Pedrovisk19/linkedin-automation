@@ -13,6 +13,8 @@ from developer_brain_ai_shared.kernel.timestamp import Timestamps, utcnow
 
 from developer_brain_ai_identity.application.dto import RegisterTenantInput, RegisterTenantOutput
 from developer_brain_ai_identity.domain.repositories import TenantRepository, UserRepository
+from developer_brain_ai_identity.domain.tenant import Tenant
+from developer_brain_ai_identity.domain.user import User
 from developer_brain_ai_identity.domain.value_objects import (
     Email,
     PasswordHash,
@@ -46,9 +48,6 @@ class RegisterTenant:
         user_ts = Timestamps(created_at=now, updated_at=now)
         tenant_id = TenantId.new()
         user_id = UserId.new()
-
-        from developer_brain_ai_identity.domain.tenant import Tenant
-        from developer_brain_ai_identity.domain.user import User
 
         tenant = Tenant.register(
             id=tenant_id, slug=slug, name=data.tenant_name, timestamps=tenant_ts

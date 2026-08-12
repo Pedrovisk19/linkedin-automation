@@ -7,7 +7,7 @@ referenciar via import (ex.: ai agent referencia JournalEntryId).
 from developer_brain_ai_shared.kernel.id import TypedId
 
 
-class JournalEntryId(TypedId):
+class JournalEntryId(TypedId["JournalEntryId"]):
     """Identificador de entrada de diario."""
 
 

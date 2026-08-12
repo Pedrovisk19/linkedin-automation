@@ -30,10 +30,12 @@ class OpenAIProvider:
         client: Any,
         chat_model: str = "gpt-4o-mini",
         embedding_model: str = "text-embedding-3-large",
+        use_structured_outputs: bool = True,
     ) -> None:
         self._client = client
         self._chat_model = chat_model
         self._embedding_model = embedding_model
+        self._use_structured = use_structured_outputs
 
     async def chat(self, request: ChatRequest) -> ChatResponse:
         kwargs: dict[str, Any] = {
@@ -45,14 +47,17 @@ class OpenAIProvider:
             kwargs["max_tokens"] = request.max_tokens
         if request.response_format is not None:
             schema = request.response_format.model_json_schema()
-            kwargs["response_format"] = {
-                "type": "json_schema",
-                "json_schema": {
-                    "name": request.response_format.__name__,
-                    "schema": schema,
-                    "strict": False,
-                },
-            }
+            if self._use_structured:
+                kwargs["response_format"] = {
+                    "type": "json_schema",
+                    "json_schema": {
+                        "name": request.response_format.__name__,
+                        "schema": schema,
+                        "strict": False,
+                    },
+                }
+            else:
+                kwargs["response_format"] = {"type": "json_object"}
 
         resp = await self._client.chat.completions.create(**kwargs)
         choice = resp.choices[0]

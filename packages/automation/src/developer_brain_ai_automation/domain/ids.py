@@ -3,7 +3,7 @@
 from developer_brain_ai_shared.kernel.id import TypedId
 
 
-class PipelineRunId(TypedId):
+class PipelineRunId(TypedId["PipelineRunId"]):
     """Identificador de um run de pipeline step (uma execucao por data/step)."""
 
 

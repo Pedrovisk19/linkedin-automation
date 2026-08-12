@@ -27,6 +27,7 @@ from developer_brain_ai_identity.application.use_cases.register_tenant import Re
 from developer_brain_ai_identity.presentation.dependencies import get_current_user_factory
 from developer_brain_ai_identity.presentation.routers import build_router
 from developer_brain_ai_shared.auth.jwt import JWTService
+from developer_brain_ai_shared.errors.http import mount_domain_error_handlers
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from identity_fakes import (
@@ -69,7 +70,6 @@ def _build_app() -> FastAPI:
         current_user_dep=current_user_dep,
     )
     app = FastAPI()
-    from developer_brain_ai_shared.errors.http import mount_domain_error_handlers
 
     mount_domain_error_handlers(app)
     app.include_router(router)

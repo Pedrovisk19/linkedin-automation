@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass
+from dataclasses import dataclass as dc
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -65,7 +66,7 @@ def test_uow_emits_set_local_tenant_id() -> None:
         reset_tenant_context()
 
     session.execute.assert_awaited_once()
-    args, kwargs = session.execute.call_args
+    args, _kwargs = session.execute.call_args
     assert "SET LOCAL app.tenant_id" in str(args[0])
     assert args[1]["tid"] == str(tenant.as_uuid())
 
@@ -83,7 +84,7 @@ def test_uow_with_explicit_tenant_overrides_context_var() -> None:
 
     asyncio.run(run())
 
-    _, kwargs = session.execute.call_args
+    _, _kwargs = session.execute.call_args
     args_pos, _ = session.execute.call_args
     assert args_pos[1]["tid"] == str(tenant.as_uuid())
 
@@ -132,7 +133,6 @@ def test_uow_commit_and_publish_collects_events() -> None:
     factory = MagicMock(return_value=session)
     disp = EventDispatcher()
     received: list[str] = []
-    from dataclasses import dataclass as dc
 
     @dc(frozen=True)
     class EvX(DomainEvent):

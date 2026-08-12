@@ -1,4 +1,4 @@
-"""Testes e2e do router /ai/summary via TestClient + DI real + FakeAIProvider + fake journal resolver."""
+"""Testes e2e do router /ai/summary via TestClient + DI real + fakes."""
 
 from __future__ import annotations
 
@@ -122,8 +122,6 @@ def test_summary_invokes_journal_resolver_with_period_dates() -> None:
         seen_calls.append({"since": since, "until": until, "tenant_id": str(tenant_id)})
         return [ENTRY]
 
-    from developer_brain_ai_ai.presentation.routers import build_router
-
     agent = SummaryAgent(
         provider=FakeAIProvider(chat_response='{"title":"x","top_learnings":[],"metrics":{}}'),
         prompt_engine=PromptEngine(PROMPTS),
@@ -156,8 +154,6 @@ def test_summary_persists_run_behind_the_scenes() -> None:
 
     async def fake_resolver(tenant_id, *, since, until):
         return [ENTRY]
-
-    from developer_brain_ai_ai.presentation.routers import build_router
 
     agent = SummaryAgent(
         provider=FakeAIProvider(chat_response='{"title":"ok"}'),

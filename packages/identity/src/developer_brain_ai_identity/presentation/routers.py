@@ -37,7 +37,7 @@ from developer_brain_ai_identity.application.use_cases.manage_api_keys import (
 )
 from developer_brain_ai_identity.application.use_cases.refresh_token import RefreshToken
 from developer_brain_ai_identity.application.use_cases.register_tenant import RegisterTenant
-from developer_brain_ai_identity.presentation.dependencies import CurrentUser
+from developer_brain_ai_identity.presentation.dependencies import CurrentUser, CurrentUserDependency
 
 
 def build_router(
@@ -48,7 +48,7 @@ def build_router(
     create_api_key_uc: CreateApiKey,
     list_api_keys_uc: ListApiKeys,
     revoke_api_key_uc: RevokeApiKey,
-    current_user_dep,
+    current_user_dep: CurrentUserDependency,
 ) -> APIRouter:
     router = APIRouter(prefix="/auth", tags=["identity"])
 

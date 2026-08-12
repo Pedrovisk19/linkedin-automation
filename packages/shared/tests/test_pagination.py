@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import pytest
 from developer_brain_ai_shared.pagination import Page, PaginationParams
+from pydantic import ValidationError
 
 
 def test_pagination_params_defaults() -> None:
@@ -17,16 +19,12 @@ def test_pagination_params_clamp() -> None:
 
 
 def test_pagination_params_rejects_negative_offset() -> None:
-    import pytest
-
-    with pytest.raises(Exception):
+    with pytest.raises(ValidationError):
         PaginationParams(offset=-1)
 
 
 def test_pagination_params_rejects_zero_limit() -> None:
-    import pytest
-
-    with pytest.raises(Exception):
+    with pytest.raises(ValidationError):
         PaginationParams(limit=0)
 
 

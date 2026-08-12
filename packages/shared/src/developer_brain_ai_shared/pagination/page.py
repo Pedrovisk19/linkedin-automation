@@ -7,7 +7,7 @@ Evita reimplementar em cada modulo. Para cursor pagination futura: nova classe
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Generic, TypeVar
+from typing import TypeVar
 
 from pydantic import BaseModel, Field
 
@@ -22,7 +22,7 @@ class PaginationParams(BaseModel):
         return self.limit, self.offset
 
 
-class Page(BaseModel, Generic[T]):
+class Page[T](BaseModel):
     """Pagina generica. ``total``eh o total absoluto (antes do limit/offset)."""
 
     items: list[T]

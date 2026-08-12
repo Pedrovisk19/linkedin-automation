@@ -60,6 +60,13 @@ class RateLimitError(DomainError):
     http_status = 429
 
 
+class IntegrationError(DomainError):
+    """Falha em integracao externa (LinkedIn, GitHub, ...)."""
+
+    code = "integration_error"
+    http_status = 502
+
+
 __all__ = [
     "ConflictError",
     "DomainError",

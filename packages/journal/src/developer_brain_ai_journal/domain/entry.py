@@ -11,7 +11,7 @@ Campos solicitados pelo brief:
 
 Invariantes:
 - title nao vazio, max 200.
-- resolutions.len == bugs_found.len (cada bug tem resolucao; resolucao pode ser "" p/ nao-resolvidos).
+- resolutions.len == bugs_found.len — resolucao por bug; pode ser "" p/ nao-resolvidos.
 - entry_date nao futura (validado por EntryDate).
 - study_minutes >= 0 (validado por StudyMinutes).
 - tags unicas (case-insensitive pos-normalizacao).
@@ -20,10 +20,11 @@ Invariantes:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Any
 
 from developer_brain_ai_shared.kernel import AggregateRoot
 from developer_brain_ai_shared.kernel.id import TenantId
-from developer_brain_ai_shared.kernel.timestamp import Timestamps
+from developer_brain_ai_shared.kernel.timestamp import Timestamps, utcnow
 
 from developer_brain_ai_journal.domain.events import (
     JournalEntryCreated,
@@ -74,8 +75,6 @@ class JournalEntry(AggregateRoot):
         if len(self.title) > 200:
             raise ValueError("title excede 200 caracteres")
         if self.timestamps is None:
-            from developer_brain_ai_shared.kernel.timestamp import utcnow
-
             now = utcnow()
             object.__setattr__(self, "timestamps", Timestamps(created_at=now, updated_at=now))
         if len(self.bugs_found) != len(self.resolutions):
@@ -86,8 +85,8 @@ class JournalEntry(AggregateRoot):
         for v in self.videos:
             if not v or not v.strip():
                 raise ValueError("video nao pode ser string vazia")
-        for l in self.links:
-            if not l or not l.strip():
+        for link in self.links:
+            if not link or not link.strip():
                 raise ValueError("link nao pode ser string vazia")
         object.__setattr__(self, "tags", _dedupe_tags(self.tags))
 
@@ -101,7 +100,7 @@ class JournalEntry(AggregateRoot):
         entry_date: EntryDate,
         study_minutes: StudyMinutes,
         timestamps: Timestamps,
-        **fields,
+        **fields: Any,
     ) -> JournalEntry:
         entry = cls(
             id=id,
@@ -115,7 +114,7 @@ class JournalEntry(AggregateRoot):
         entry.record_event(JournalEntryCreated(journal_entry_id=id))
         return entry
 
-    def update(self, **fields) -> None:
+    def update(self, **fields: Any) -> None:
         if "title" in fields:
             v = fields["title"]
             if not v or not v.strip() or len(v) > 200:
@@ -142,8 +141,6 @@ class JournalEntry(AggregateRoot):
             raw = fields["tags"]
             converted = [Tag(t) if isinstance(t, str) else t for t in raw]
             object.__setattr__(self, "tags", _dedupe_tags(converted))
-
-        from developer_brain_ai_shared.kernel.timestamp import utcnow
 
         object.__setattr__(self, "timestamps", self.timestamps.touch(at=utcnow()))
         self.record_event(JournalEntryUpdated(journal_entry_id=self.id))

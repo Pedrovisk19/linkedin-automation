@@ -17,23 +17,23 @@ from developer_brain_ai_shared.kernel.timestamp import Timestamps, utcnow
 
 def _make_entry(**overrides) -> JournalEntry:
     now = utcnow()
-    base = dict(
-        id=JournalEntryId.new(),
-        tenant_id=TenantId.new(),
-        title="Round trip",
-        entry_date=EntryDate(date.today()),
-        study_minutes=StudyMinutes(45),
-        timestamps=Timestamps(created_at=now, updated_at=now),
-        technologies=["rust", "tokio"],
-        project="dba",
-        difficulties="nada",
-        learnings="muito",
-        bugs_found=["bug1"],
-        resolutions=["res1"],
-        next_steps="proximo",
-        notes="notas",
-        tags=[Tag("rust"), Tag("async")],
-    )
+    base = {
+        "id": JournalEntryId.new(),
+        "tenant_id": TenantId.new(),
+        "title": "Round trip",
+        "entry_date": EntryDate(date.today()),
+        "study_minutes": StudyMinutes(45),
+        "timestamps": Timestamps(created_at=now, updated_at=now),
+        "technologies": ["rust", "tokio"],
+        "project": "dba",
+        "difficulties": "nada",
+        "learnings": "muito",
+        "bugs_found": ["bug1"],
+        "resolutions": ["res1"],
+        "next_steps": "proximo",
+        "notes": "notas",
+        "tags": [Tag("rust"), Tag("async")],
+    }
     base.update(overrides)
     return JournalEntry.create(**base)
 

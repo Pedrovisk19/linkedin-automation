@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -19,7 +20,7 @@ class CreateLinkedInDraftInput(BaseModel):
 
 
 class GenerateLinkedInInput(BaseModel):
-    entries: list[dict] = Field(default_factory=list)
+    entries: list[dict[str, Any]] = Field(default_factory=list)
     ai_writing_tone: str = Field(default="desenvolvedor-compartilhando-evolucao", max_length=200)
     ai_language: str = Field(default="pt-BR", max_length=20)
 

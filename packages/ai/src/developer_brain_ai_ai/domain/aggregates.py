@@ -17,6 +17,7 @@ from developer_brain_ai_shared.kernel import AggregateRoot
 from developer_brain_ai_shared.kernel.id import TenantId
 from developer_brain_ai_shared.kernel.timestamp import Timestamps
 
+from developer_brain_ai_ai.domain.renderer import render
 from developer_brain_ai_ai.domain.value_objects import AgentName, PromptName, PromptVersion
 
 
@@ -29,14 +30,12 @@ class PromptTemplate(AggregateRoot):
     content: str
 
     def render(self, variables: dict[str, str]) -> str:
-        from developer_brain_ai_ai.domain.renderer import render
 
         return render(self.content, variables)
 
 
 @dataclass(eq=False)
 class AgentRun(AggregateRoot):
-    id: object
     tenant_id: TenantId
     agent: AgentName
     prompt_name: PromptName
@@ -53,7 +52,6 @@ class AgentRun(AggregateRoot):
 class MemoryFragment(AggregateRoot):
     """Fragmento persistido de contexto. Embedding fica em infra (pgvector)."""
 
-    id: object
     tenant_id: TenantId
     key: str
     content: str

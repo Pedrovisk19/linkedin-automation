@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from developer_brain_ai_shared.kernel.id import ApiKeyId
+from developer_brain_ai_shared.kernel.id import ApiKeyId, TenantId, UserId
 from developer_brain_ai_shared.kernel.timestamp import Timestamps, utcnow
 
 from developer_brain_ai_identity.application.dto import CreateApiKeyInput, CreateApiKeyOutput
 from developer_brain_ai_identity.domain.api_key import ApiKey
 from developer_brain_ai_identity.domain.api_key_repository import ApiKeyRepository
+from developer_brain_ai_identity.domain.value_objects import ApiKeyPlain
 
 
 class CreateApiKey:
@@ -16,11 +17,10 @@ class CreateApiKey:
 
     async def execute(
         self,
-        tenant_id,
-        user_id,
+        tenant_id: TenantId,
+        user_id: UserId,
         data: CreateApiKeyInput,
     ) -> CreateApiKeyOutput:
-        from developer_brain_ai_identity.domain.value_objects import ApiKeyPlain
 
         plain = ApiKeyPlain.generate()
         now = utcnow()

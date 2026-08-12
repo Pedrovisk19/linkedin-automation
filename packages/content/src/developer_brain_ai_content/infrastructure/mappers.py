@@ -12,6 +12,7 @@ from developer_brain_ai_shared.kernel.id import TenantId
 from developer_brain_ai_shared.kernel.timestamp import Timestamps
 
 from developer_brain_ai_content.domain.aggregates import ContentDraft, PublicationQueueItem
+from developer_brain_ai_content.domain.ids import ContentDraftId, PublicationQueueItemId
 from developer_brain_ai_content.domain.value_objects import ContentType, DraftStatus, Hashtag
 from developer_brain_ai_content.infrastructure.orm import (
     ContentDraftORM,
@@ -37,7 +38,7 @@ def draft_to_orm(draft: ContentDraft) -> ContentDraftORM:
 
 def draft_from_orm(o: ContentDraftORM) -> ContentDraft:
     return ContentDraft(
-        id=o.id,
+        id=ContentDraftId.from_uuid(o.id),
         tenant_id=TenantId(o.tenant_id),
         agent=o.agent,
         content_type=ContentType(o.content_type),
@@ -67,9 +68,9 @@ def queue_item_to_orm(item: PublicationQueueItem) -> PublicationQueueItemORM:
 
 def queue_item_from_orm(o: PublicationQueueItemORM) -> PublicationQueueItem:
     return PublicationQueueItem(
-        id=o.id,
+        id=PublicationQueueItemId.from_uuid(o.id),
         tenant_id=TenantId(o.tenant_id),
-        draft_id=o.draft_id,
+        draft_id=ContentDraftId.from_uuid(o.draft_id),
         scheduled_for=o.scheduled_for,
         queued_at=o.queued_at,
         published_at=o.published_at,

@@ -21,12 +21,14 @@ from developer_brain_ai_identity.application.use_cases.refresh_token import Refr
 from developer_brain_ai_identity.application.use_cases.register_tenant import RegisterTenant
 from developer_brain_ai_shared.auth.jwt import JWTService
 from developer_brain_ai_shared.errors.base import ConflictError, NotFoundError, UnauthorizedError
+from developer_brain_ai_shared.kernel.id import TenantId, UserId
 from identity_fakes import (
     FakeApiKeyRepository,
     FakePasswordHasher,
     FakeTenantRepository,
     FakeUserRepository,
 )
+from pydantic import ValidationError
 
 SECRET = "test-secret-please-replace-me-12345678901234567890"
 
@@ -123,7 +125,7 @@ def test_register_tenant_rejects_dup_email() -> None:
 
 def test_register_tenant_rejects_weak_password() -> None:
     uc = _register_uc()
-    with pytest.raises(Exception):
+    with pytest.raises(ValidationError):
         asyncio.run(
             uc.execute(
                 RegisterTenantInput(
@@ -245,7 +247,6 @@ def test_login_suspended_user_unified_error() -> None:
 
 def test_refresh_returns_new_pair() -> None:
     jwt = JWTService(secret=SECRET)
-    from developer_brain_ai_shared.kernel.id import TenantId, UserId
 
     pair = jwt.issue_pair(UserId.new(), TenantId.new())
     out = asyncio.run(RefreshToken(jwt).execute(RefreshInput(refresh_token=pair.refresh_token)))
@@ -255,7 +256,6 @@ def test_refresh_returns_new_pair() -> None:
 
 def test_refresh_rejects_access_token() -> None:
     jwt = JWTService(secret=SECRET)
-    from developer_brain_ai_shared.kernel.id import TenantId, UserId
 
     pair = jwt.issue_pair(UserId.new(), TenantId.new())
     with pytest.raises(UnauthorizedError):
@@ -270,7 +270,6 @@ def test_refresh_rejects_garbage() -> None:
 
 def test_create_api_key_returns_display_once() -> None:
     repo = FakeApiKeyRepository()
-    from developer_brain_ai_shared.kernel.id import TenantId, UserId
 
     tid, uid = TenantId.new(), UserId.new()
     out = asyncio.run(CreateApiKey(repo).execute(tid, uid, CreateApiKeyInput(label="laptop")))
@@ -285,7 +284,6 @@ def test_create_api_key_returns_display_once() -> None:
 
 def test_list_api_keys_returns_user_keys() -> None:
     repo = FakeApiKeyRepository()
-    from developer_brain_ai_shared.kernel.id import TenantId, UserId
 
     tid, uid = TenantId.new(), UserId.new()
     asyncio.run(CreateApiKey(repo).execute(tid, uid, CreateApiKeyInput(label="k1")))
@@ -297,7 +295,6 @@ def test_list_api_keys_returns_user_keys() -> None:
 
 def test_revoke_api_key_marks_revoked() -> None:
     repo = FakeApiKeyRepository()
-    from developer_brain_ai_shared.kernel.id import TenantId, UserId
 
     tid, uid = TenantId.new(), UserId.new()
     out = asyncio.run(CreateApiKey(repo).execute(tid, uid, CreateApiKeyInput(label="x")))

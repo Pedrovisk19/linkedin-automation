@@ -30,18 +30,18 @@ def test_content_type_enum_values() -> None:
 
 def _mk_draft(**overrides) -> ContentDraft:
     now = utcnow()
-    base = dict(
-        id=object(),
-        tenant_id=TenantId.new(),
-        agent="linkedin",
-        content_type=ContentType.LINKEDIN_POST,
-        title="Post sobre DI",
-        body_markdown="# DI is life",
-        hashtags=[Hashtag("fastapi")],
-        metadata={"gancho": "pegador"},
-        status=DraftStatus.PENDING_REVIEW,
-        timestamps=Timestamps(created_at=now, updated_at=now),
-    )
+    base = {
+        "id": object(),
+        "tenant_id": TenantId.new(),
+        "agent": "linkedin",
+        "content_type": ContentType.LINKEDIN_POST,
+        "title": "Post sobre DI",
+        "body_markdown": "# DI is life",
+        "hashtags": [Hashtag("fastapi")],
+        "metadata": {"gancho": "pegador"},
+        "status": DraftStatus.PENDING_REVIEW,
+        "timestamps": Timestamps(created_at=now, updated_at=now),
+    }
     base.update(overrides)
     return ContentDraft(**base)
 

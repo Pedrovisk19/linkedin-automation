@@ -13,7 +13,7 @@ from __future__ import annotations
 from developer_brain_ai_shared.auth.jwt import JWTService
 from developer_brain_ai_shared.auth.password import PasswordHasher
 from developer_brain_ai_shared.errors.base import UnauthorizedError
-from developer_brain_ai_shared.persistence.tenant import set_tenant_context
+from developer_brain_ai_shared.persistence.tenant import reset_tenant_context, set_tenant_context
 
 from developer_brain_ai_identity.application.dto import LoginInput, TokenOutput
 from developer_brain_ai_identity.domain.repositories import TenantRepository, UserRepository
@@ -42,8 +42,6 @@ class LoginUser:
         try:
             user = await self._users.get_by_email(Email(data.email))
         finally:
-            from developer_brain_ai_shared.persistence.tenant import reset_tenant_context
-
             reset_tenant_context()
 
         if user is None or not user.is_active:

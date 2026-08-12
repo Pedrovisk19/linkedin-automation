@@ -1,6 +1,7 @@
 """Adapters de infraestrutura para o identity: bcrypt (lib direta, sem passlib) e SystemClock.
 
-Justificativa: passlib quebrou em bcrypt>=4 + Python 3.14 (`module 'bcrypt' has no attribute '__about__'`).
+Justificativa: passlib quebrou em bcrypt>=4 + Python 3.14
+(`module 'bcrypt' has no attribute '__about__'`).
 Usar bcrypt direto e mais robusto e remove a dependencia quebrada. Mantemos o
 PasswordHasher Protocol — callers nao mudam.
 """

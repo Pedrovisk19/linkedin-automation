@@ -11,6 +11,7 @@ from developer_brain_ai_shared.persistence import (
     reset_tenant_context,
     set_tenant_context,
 )
+from developer_brain_ai_shared.persistence.tenant import require_tenant_or_403
 
 
 def test_default_context_is_none() -> None:
@@ -41,7 +42,6 @@ def test_reset_clears_context() -> None:
 
 
 def test_require_tenant_or_403_mismatch_raises() -> None:
-    from developer_brain_ai_shared.persistence.tenant import require_tenant_or_403
 
     a, b = TenantId.new(), TenantId.new()
     set_tenant_context(a)

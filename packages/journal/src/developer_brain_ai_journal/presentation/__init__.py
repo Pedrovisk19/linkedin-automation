@@ -1,7 +1,8 @@
 """Composition helper do journal — monta use cases + router com DI."""
 
+from developer_brain_ai_identity.presentation.dependencies import CurrentUserDependency
 from fastapi import APIRouter
-from sqlalchemy.ext.asyncio import async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from developer_brain_ai_journal.application.use_cases import (
     CreateJournalEntry,
@@ -16,8 +17,8 @@ from developer_brain_ai_journal.presentation.routers import build_router
 
 def mount_journal(
     *,
-    session_factory: async_sessionmaker,
-    current_user_dep,
+    session_factory: async_sessionmaker[AsyncSession],
+    current_user_dep: CurrentUserDependency,
 ) -> APIRouter:
     repo = SqlAlchemyJournalEntryRepository(session_factory)
     create_uc = CreateJournalEntry(repo)

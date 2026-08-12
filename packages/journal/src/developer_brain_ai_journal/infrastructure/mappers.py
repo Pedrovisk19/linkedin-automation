@@ -23,9 +23,11 @@ def _jload(value: str | list[str]) -> list[str]:
     if not value:
         return []
     try:
-        return json.loads(value)
+        parsed = json.loads(value)
     except json.JSONDecodeError, TypeError:
         return []
+    assert isinstance(parsed, list)
+    return [str(x) for x in parsed]
 
 
 def entry_to_orm(entry: JournalEntry) -> JournalEntryORM:

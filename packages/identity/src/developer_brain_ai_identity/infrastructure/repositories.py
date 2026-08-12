@@ -10,8 +10,10 @@ NAO fazemos set_tenant_context (responsabilidade do caller / middleware).
 
 from __future__ import annotations
 
+from datetime import datetime
+
 from developer_brain_ai_shared.kernel.id import ApiKeyId, TenantId, UserId
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from developer_brain_ai_identity.domain.api_key import ApiKey
@@ -30,7 +32,9 @@ from developer_brain_ai_identity.infrastructure.mappers import (
 from developer_brain_ai_identity.infrastructure.orm import ApiKeyORM, TenantORM, UserORM
 
 
-def _maybe_session(ctx_session: AsyncSession | None, factory) -> AsyncSession:
+def _maybe_session(
+    ctx_session: AsyncSession | None, factory: async_sessionmaker[AsyncSession]
+) -> AsyncSession:
     return ctx_session or factory()
 
 
@@ -41,8 +45,8 @@ class SqlAlchemyTenantRepository(TenantRepository):
     async def _open(self) -> AsyncSession:
         return self._factory()
 
-    async def get_by_id(self, tenant_id: TenantId) -> TenantORM | None:  # type: ignore[override]
-        async with await self._factory() as s:
+    async def get_by_id(self, tenant_id: TenantId) -> Tenant | None:
+        async with self._factory() as s:
             o = await s.get(TenantORM, tenant_id.as_uuid())
             return tenant_from_orm(o) if o else None
 
@@ -125,8 +129,7 @@ class SqlAlchemyApiKeyRepository:
             r = await s.execute(stmt)
             return [api_key_from_orm(o) for o in r.scalars().all()]
 
-    async def update_last_used(self, api_key_id: ApiKeyId, at) -> None:
-        from sqlalchemy import update
+    async def update_last_used(self, api_key_id: ApiKeyId, at: datetime) -> None:
 
         async with self._factory() as s:
             await s.execute(
@@ -137,7 +140,6 @@ class SqlAlchemyApiKeyRepository:
             await s.commit()
 
     async def revoke(self, api_key_id: ApiKeyId) -> None:
-        from sqlalchemy import update
 
         async with self._factory() as s:
             await s.execute(

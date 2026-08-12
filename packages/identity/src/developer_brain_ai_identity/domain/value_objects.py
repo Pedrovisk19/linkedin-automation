@@ -9,16 +9,17 @@
 
 from __future__ import annotations
 
+import hashlib
 import re
 import secrets
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 _SLUG_RE = re.compile(r"^[a-z0-9](?:[a-z0-9-]{1,38}[a-z0-9])?$")
 
 
-class UserRole(str, Enum):
+class UserRole(StrEnum):
     ADMIN = "admin"
     MEMBER = "member"
 
@@ -79,7 +80,6 @@ class ApiKeyPlain:
         return f"dba_{self.prefix}.{self.secret}"
 
     def hashed_value(self) -> str:
-        import hashlib
 
         return hashlib.sha256(self.display.encode()).hexdigest()
 

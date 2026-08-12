@@ -41,7 +41,7 @@ def _to_out(entry: JournalEntry) -> JournalEntryOut:
         book=entry.book,
         course=entry.course,
         videos=entry.videos,
-        links=[str(l) for l in entry.links],
+        links=[str(link) for link in entry.links],
         difficulties=entry.difficulties,
         learnings=entry.learnings,
         bugs_found=entry.bugs_found,
@@ -87,7 +87,7 @@ class CreateJournalEntry:
             book=data.book,
             course=data.course,
             videos=data.videos,
-            links=[str(l) for l in data.links],
+            links=[str(link) for link in data.links],
             difficulties=data.difficulties,
             learnings=data.learnings,
             bugs_found=data.bugs_found,
@@ -153,7 +153,7 @@ class UpdateJournalEntry:
         if entry is None:
             raise NotFoundError("journal entry nao encontrada", details={"id": entry_id})
 
-        updates: dict = {}
+        updates: dict[str, object] = {}
         dirty = data.model_dump(exclude_unset=True)
         if "bugs_found" in dirty and "resolutions" in dirty:
             if len(dirty["bugs_found"]) != len(dirty["resolutions"]):
@@ -169,7 +169,7 @@ class UpdateJournalEntry:
             elif k == "study_minutes":
                 updates["study_minutes"] = StudyMinutes(v)
             elif k == "links":
-                updates["links"] = [str(l) for l in v]
+                updates["links"] = [str(link) for link in v]
             elif k == "tags":
                 updates["tags"] = _parse_tags(v)
             else:

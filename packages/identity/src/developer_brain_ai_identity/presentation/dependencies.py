@@ -13,6 +13,7 @@ uma task; contextvars sao propagadas dentro da mesma task.
 Nota: SEM `from __future__ import annotations` para preservar Depends metadata vivo.
 """
 
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import Annotated
 
@@ -29,13 +30,16 @@ class CurrentUser:
     tenant_id: TenantId
 
 
+type CurrentUserDependency = Callable[..., Awaitable[CurrentUser]]
+
+
 def _extract_bearer(authorization: str | None) -> str:
     if not authorization or not authorization.lower().startswith("bearer "):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="bearer token ausente")
     return authorization.split(" ", 1)[1].strip()
 
 
-def get_current_user_factory(jwt: JWTService):
+def get_current_user_factory(jwt: JWTService) -> CurrentUserDependency:
     """Factory pois JWTService e injetavel (nao global)."""
 
     async def _dep(

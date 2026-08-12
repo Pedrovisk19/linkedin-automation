@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+import uuid
 from datetime import date
 
 from developer_brain_ai_shared.kernel.id import TenantId
 from developer_brain_ai_shared.pagination import PaginationParams
-from sqlalchemy import delete, select
+from sqlalchemy import Select, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from developer_brain_ai_journal.domain.entry import JournalEntry
@@ -21,7 +22,7 @@ from developer_brain_ai_journal.infrastructure.orm import (
 )
 
 
-def _tags_for(entry_id) -> select:
+def _tags_for(entry_id: uuid.UUID) -> Select[tuple[str]]:
     return (
         select(TagORM.value)
         .join(JournalEntryTagORM, JournalEntryTagORM.tag_id == TagORM.id)
@@ -34,29 +35,33 @@ class SqlAlchemyJournalEntryRepository(JournalEntryRepository):
     def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
         self._factory = session_factory
 
-    async def _load_tags(self, s: AsyncSession, entry_id) -> list[str]:
-        r = await s.execute(_tags_for(entry_id))
-        return [t for (t,) in r.all()]
+    async def _load_tags(self, s: AsyncSession, entry_id: uuid.UUID) -> list[str]:
+        rows = (await s.execute(_tags_for(entry_id))).all()
+        return [t for (t,) in rows]
 
-    async def _upsert_tags(self, s: AsyncSession, tenant_id, tags: list[Tag]) -> list:
+    async def _upsert_tags(
+        self, s: AsyncSession, tenant_id: uuid.UUID, tags: list[Tag]
+    ) -> list[TagORM]:
         existing_q = select(TagORM).where(
             TagORM.tenant_id == tenant_id,
             TagORM.value.in_([str(t) for t in tags]),
         )
         existing = {t.value: t for t in (await s.execute(existing_q)).scalars().all()}
-        out: list = []
+        out: list[TagORM] = []
         for tag in tags:
             v = str(tag)
             if v in existing:
                 out.append(existing[v])
                 continue
-            new = TagORM(id=tenant_id, tenant_id=tenant_id, value=v)
+            new = TagORM(id=uuid.uuid4(), tenant_id=tenant_id, value=v)
             s.add(new)
             await s.flush()
             out.append(new)
         return out
 
-    async def _sync_tags(self, s: AsyncSession, entry_id, tag_orms: list) -> None:
+    async def _sync_tags(
+        self, s: AsyncSession, entry_id: uuid.UUID, tag_orms: list[TagORM]
+    ) -> None:
         await s.execute(
             delete(JournalEntryTagORM).where(JournalEntryTagORM.journal_entry_id == entry_id)
         )

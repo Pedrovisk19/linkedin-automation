@@ -6,6 +6,8 @@ de tenant entre requests via set_tenant_context (feito pelo Depends current_user
 
 from __future__ import annotations
 
+from datetime import date, timedelta
+
 from developer_brain_ai_identity.presentation.dependencies import get_current_user_factory
 from developer_brain_ai_journal.application.use_cases import (
     CreateJournalEntry,
@@ -17,6 +19,7 @@ from developer_brain_ai_journal.application.use_cases import (
 from developer_brain_ai_journal.presentation.routers import build_router
 from developer_brain_ai_shared.auth.jwt import JWTService
 from developer_brain_ai_shared.errors.http import mount_domain_error_handlers
+from developer_brain_ai_shared.kernel.id import TenantId, UserId
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from journal_fakes import FakeJournalEntryRepository
@@ -51,7 +54,6 @@ def _build_app() -> FastAPI:
 
 
 def _make_token(tenant_id: str, user_id: str) -> str:
-    from developer_brain_ai_shared.kernel.id import TenantId, UserId
 
     jwt = JWTService(secret=SECRET)
     pair = jwt.issue_pair(UserId(user_id), TenantId(tenant_id))
@@ -68,7 +70,6 @@ def test_journal_protected_requires_bearer() -> None:
 
 def test_create_returns_201_with_full_dto() -> None:
     app = _build_app()
-    from developer_brain_ai_shared.kernel.id import TenantId, UserId
 
     tid, uid = TenantId.new(), UserId.new()
     token = _make_token(str(tid), str(uid))
@@ -91,7 +92,6 @@ def test_create_returns_201_with_full_dto() -> None:
 
 def test_create_rejects_with_422_invalid_payload() -> None:
     app = _build_app()
-    from developer_brain_ai_shared.kernel.id import TenantId, UserId
 
     token = _make_token(str(TenantId.new()), str(UserId.new()))
     bad = {"title": "", "entry_date": "2026-08-06", "study_minutes": 90}
@@ -102,21 +102,17 @@ def test_create_rejects_with_422_invalid_payload() -> None:
 
 def test_create_rejects_future_entry_date() -> None:
     app = _build_app()
-    from datetime import date, timedelta
-
-    from developer_brain_ai_shared.kernel.id import TenantId, UserId
 
     token = _make_token(str(TenantId.new()), str(UserId.new()))
     bad = dict(ENTRY_PAYLOAD)
     bad["entry_date"] = (date.today() + timedelta(days=5)).isoformat()
     with TestClient(app) as c:
         r = c.post("/journals", json=bad, headers={"Authorization": f"Bearer {token}"})
-    assert r.status_code == 400 or r.status_code == 422
+    assert r.status_code in {400, 422}
 
 
 def test_get_unknown_returns_404() -> None:
     app = _build_app()
-    from developer_brain_ai_shared.kernel.id import TenantId, UserId
 
     token = _make_token(str(TenantId.new()), str(UserId.new()))
     with TestClient(app) as c:
@@ -130,7 +126,6 @@ def test_get_unknown_returns_404() -> None:
 
 def test_list_filters_by_tag() -> None:
     app = _build_app()
-    from developer_brain_ai_shared.kernel.id import TenantId, UserId
 
     token = _make_token(str(TenantId.new()), str(UserId.new()))
     auth = {"Authorization": f"Bearer {token}"}
@@ -152,7 +147,6 @@ def test_list_filters_by_tag() -> None:
 
 def test_list_paginates() -> None:
     app = _build_app()
-    from developer_brain_ai_shared.kernel.id import TenantId, UserId
 
     token = _make_token(str(TenantId.new()), str(UserId.new()))
     auth = {"Authorization": f"Bearer {token}"}
@@ -170,7 +164,6 @@ def test_list_paginates() -> None:
 
 def test_patch_updates_title() -> None:
     app = _build_app()
-    from developer_brain_ai_shared.kernel.id import TenantId, UserId
 
     token = _make_token(str(TenantId.new()), str(UserId.new()))
     auth = {"Authorization": f"Bearer {token}"}
@@ -184,7 +177,6 @@ def test_patch_updates_title() -> None:
 
 def test_patch_unknown_returns_404() -> None:
     app = _build_app()
-    from developer_brain_ai_shared.kernel.id import TenantId, UserId
 
     token = _make_token(str(TenantId.new()), str(UserId.new()))
     with TestClient(app) as c:
@@ -198,7 +190,6 @@ def test_patch_unknown_returns_404() -> None:
 
 def test_delete_existing_and_then_404_on_get() -> None:
     app = _build_app()
-    from developer_brain_ai_shared.kernel.id import TenantId, UserId
 
     token = _make_token(str(TenantId.new()), str(UserId.new()))
     auth = {"Authorization": f"Bearer {token}"}
@@ -212,7 +203,6 @@ def test_delete_existing_and_then_404_on_get() -> None:
 
 def test_delete_unknown_returns_404() -> None:
     app = _build_app()
-    from developer_brain_ai_shared.kernel.id import TenantId, UserId
 
     token = _make_token(str(TenantId.new()), str(UserId.new()))
     with TestClient(app) as c:
@@ -225,7 +215,6 @@ def test_delete_unknown_returns_404() -> None:
 
 def test_isolation_between_tenants_in_http() -> None:
     app = _build_app()
-    from developer_brain_ai_shared.kernel.id import TenantId, UserId
 
     t1 = _make_token(str(TenantId.new()), str(UserId.new()))
     t2 = _make_token(str(TenantId.new()), str(UserId.new()))

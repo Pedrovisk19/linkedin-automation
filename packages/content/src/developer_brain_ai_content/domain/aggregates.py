@@ -14,21 +14,22 @@ from datetime import datetime
 from developer_brain_ai_shared.errors.base import ValidationError
 from developer_brain_ai_shared.kernel import AggregateRoot
 from developer_brain_ai_shared.kernel.id import TenantId
-from developer_brain_ai_shared.kernel.timestamp import Timestamps
+from developer_brain_ai_shared.kernel.timestamp import Timestamps, utcnow
 
+from developer_brain_ai_content.domain.ids import ContentDraftId, PublicationQueueItemId
 from developer_brain_ai_content.domain.value_objects import ContentType, DraftStatus, Hashtag
 
 
 @dataclass(eq=False)
 class ContentDraft(AggregateRoot):
-    id: object
+    id: ContentDraftId
     tenant_id: TenantId
     agent: str
     content_type: ContentType
     title: str
     body_markdown: str
     hashtags: list[Hashtag] = field(default_factory=list)
-    metadata: dict = field(default_factory=dict)
+    metadata: dict[str, object] = field(default_factory=dict)
     status: DraftStatus = DraftStatus.PENDING_REVIEW
     timestamps: Timestamps = field(default=None)  # type: ignore[assignment]
 
@@ -47,8 +48,6 @@ class ContentDraft(AggregateRoot):
             raise TypeError("status deve ser DraftStatus")
         object.__setattr__(self, "hashtags", _dedupe_hashtags(self.hashtags))
         if self.timestamps is None:
-            from developer_brain_ai_shared.kernel.timestamp import utcnow
-
             now = utcnow()
             object.__setattr__(self, "timestamps", Timestamps(created_at=now, updated_at=now))
 
@@ -76,16 +75,15 @@ class ContentDraft(AggregateRoot):
 
 @dataclass(eq=False)
 class PublicationQueueItem(AggregateRoot):
-    id: object
+    id: PublicationQueueItemId
     tenant_id: TenantId
-    draft_id: object
+    draft_id: ContentDraftId
     scheduled_for: datetime
     queued_at: datetime
     published_at: datetime | None = None
     timestamps: Timestamps = field(default=None)  # type: ignore[assignment]
 
     def __post_init__(self) -> None:
-        from developer_brain_ai_shared.kernel.timestamp import utcnow
 
         if self.timestamps is None:
             now = utcnow()
@@ -108,8 +106,7 @@ def _dedupe_hashtags(tags: list[Hashtag]) -> list[Hashtag]:
     return out
 
 
-def _touch(draft: ContentDraft) -> None:
-    from developer_brain_ai_shared.kernel.timestamp import utcnow
+def _touch(draft: ContentDraft | PublicationQueueItem) -> None:
 
     object.__setattr__(draft, "timestamps", draft.timestamps.touch(at=utcnow()))
 

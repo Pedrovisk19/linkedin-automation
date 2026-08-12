@@ -20,14 +20,21 @@ funcionar tambem para repos que abrem sessao propria e para jobs do Arq worker
 
 from __future__ import annotations
 
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Callable
 from typing import Protocol
 
 from sqlalchemy import event, text
-from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
+from sqlalchemy.engine import Connection
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_engine_from_config,
+    async_sessionmaker,
+)
 
 from developer_brain_ai_shared.events.base import DomainEvent
 from developer_brain_ai_shared.events.dispatcher import EventDispatcher
+from developer_brain_ai_shared.kernel import AggregateRoot
 from developer_brain_ai_shared.kernel.id import TenantId
 from developer_brain_ai_shared.persistence.tenant import (
     get_tenant_context,
@@ -81,7 +88,7 @@ class UnitOfWork:
             await self.session.close()
             self.session = None
 
-    async def commit_and_publish(self, aggregates: list) -> int:
+    async def commit_and_publish(self, aggregates: list[AggregateRoot]) -> int:
         """Apos commit, coleta eventos dos aggregate roots e publica via dispatcher."""
         if self.session is None:
             raise RuntimeError("UoW closed")
@@ -106,7 +113,6 @@ class EngineFactory:
         max_overflow: int = 20,
         pool_pre_ping: bool = True,
     ) -> tuple[AsyncEngine, async_sessionmaker[AsyncSession]]:
-        from sqlalchemy.ext.asyncio import async_engine_from_config
 
         engine = async_engine_from_config(
             {
@@ -122,14 +128,14 @@ class EngineFactory:
         return engine, factory
 
 
-def _begin_handler():
+def _begin_handler() -> Callable[[Connection], None]:
     """Retorna handler de ``begin`` que define app.tenant_id quando ha tenant no ContextVar.
 
     Usa ``set_config`` (funcao SQL) em vez de ``SET LOCAL`` porque oSET LOCAL
     nao suporta parametros bind no protocolo do asyncpg ($1).
     """
 
-    def _set_app_tenant(conn) -> None:
+    def _set_app_tenant(conn: Connection) -> None:
         current = get_tenant_context_optional()
         if current is not None:
             conn.execute(
@@ -140,7 +146,9 @@ def _begin_handler():
     return _set_app_tenant
 
 
-def _bind_tenant_rls(engine: AsyncEngine, handler=None) -> None:
+def _bind_tenant_rls(
+    engine: AsyncEngine, handler: Callable[[Connection], None] | None = None
+) -> None:
     """Registra no engine o handler de RLS (dispara no begin de cada conexao).
 
     Sem contexto de tenant (migrations, leitura de tenants) nada e emitido.

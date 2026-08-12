@@ -10,6 +10,7 @@ from developer_brain_ai_shared.kernel import (
     AggregateRoot,
     Entity,
     TenantId,
+    Timestamps,
     UserId,
     utcnow,
 )
@@ -80,7 +81,6 @@ def test_aggregate_root_records_and_pulls_events() -> None:
 
 
 def test_timestamps_touch_cannot_retrocede() -> None:
-    from developer_brain_ai_shared.kernel import Timestamps
 
     now = utcnow()
     ts = Timestamps(created_at=now, updated_at=now)

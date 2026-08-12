@@ -29,7 +29,9 @@ class ContentDraftORM(TenantScopedMixin, TimestampMixin, Base):
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     body_markdown: Mapped[str] = mapped_column(Text, nullable=False)
     hashtags: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
-    metadata_json: Mapped[dict] = mapped_column("metadata", JSON, nullable=False, default=dict)
+    metadata_json: Mapped[dict[str, object]] = mapped_column(
+        "metadata", JSON, nullable=False, default=dict
+    )
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="pending_review")
 
 

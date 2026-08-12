@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from datetime import date
+from datetime import date as _date
 
 _TAG_RE = re.compile(r"^[a-z0-9][a-z0-9_-]{0,39}$")
 
@@ -46,7 +47,6 @@ class EntryDate:
     value: date
 
     def __post_init__(self) -> None:
-        from datetime import date as _date
 
         if self.value > _date.today():
             raise ValueError("entry_date nao pode ser futura")

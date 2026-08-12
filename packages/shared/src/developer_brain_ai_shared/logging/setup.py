@@ -51,7 +51,8 @@ def clear_context() -> None:
 
 
 def get_logger(name: str | None = None) -> structlog.stdlib.BoundLogger:
-    return structlog.get_logger(name)
+    logger: structlog.stdlib.BoundLogger = structlog.get_logger(name)
+    return logger
 
 
 __all__ = ["bind_context", "clear_context", "configure_logging", "get_logger"]

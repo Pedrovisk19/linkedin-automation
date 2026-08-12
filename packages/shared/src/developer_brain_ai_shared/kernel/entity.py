@@ -11,7 +11,7 @@ Regras:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from developer_brain_ai_shared.events.base import DomainEvent
@@ -22,7 +22,7 @@ from developer_brain_ai_shared.kernel.id import TypedId
 class Entity:
     """Entidade base. Comparacao por tipo + id."""
 
-    id: TypedId
+    id: TypedId[Any]
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, type(self)) and other.id == self.id

@@ -6,6 +6,10 @@ NAO usa `from __future__ import annotations` (ADR-0012).
 from datetime import date
 from typing import Annotated
 
+from developer_brain_ai_identity.presentation.dependencies import (
+    CurrentUser,
+    CurrentUserDependency,
+)
 from fastapi import APIRouter, Depends, Query
 
 from developer_brain_ai_journal.application.dto import (
@@ -29,9 +33,8 @@ def build_router(
     list_uc: ListJournalEntries,
     update_uc: UpdateJournalEntry,
     delete_uc: DeleteJournalEntry,
-    current_user_dep,
+    current_user_dep: CurrentUserDependency,
 ) -> APIRouter:
-    from developer_brain_ai_identity.presentation.dependencies import CurrentUser
 
     UserDep = Annotated[CurrentUser, Depends(current_user_dep)]
     router = APIRouter(prefix="/journals", tags=["journal"])
@@ -41,7 +44,7 @@ def build_router(
         return await create_uc.execute(current.tenant_id, body)
 
     @router.get("", response_model=list[JournalEntryOut])
-    async def list_entries(
+    async def list_entries(  # noqa: PLR0917 — params sao query params do FastAPI
         current: UserDep,
         since: Annotated[date | None, Query()] = None,
         until: Annotated[date | None, Query()] = None,

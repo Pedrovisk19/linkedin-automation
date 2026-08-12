@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from developer_brain_ai_shared.auth.jwt import JWTService
 from fastapi import APIRouter
-from sqlalchemy.ext.asyncio import async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from developer_brain_ai_identity.application.use_cases import (
     build_create_api_key,
@@ -26,7 +26,7 @@ from developer_brain_ai_identity.presentation.routers import build_router
 
 def mount_identity(
     *,
-    session_factory: async_sessionmaker,
+    session_factory: async_sessionmaker[AsyncSession],
     jwt: JWTService,
 ) -> APIRouter:
     """Recebe session_factory + jwt do composition root; devolve router pronto p/ include."""

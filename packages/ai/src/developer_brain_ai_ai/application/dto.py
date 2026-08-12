@@ -8,6 +8,7 @@ SummaryAgent:
 from __future__ import annotations
 
 from datetime import date
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -16,7 +17,7 @@ class SummaryAgentInput(BaseModel):
     period_kind: str = Field(pattern=r"^(daily|weekly|monthly)$")
     start_date: date
     end_date: date
-    entries: list[dict] = Field(default_factory=list)
+    entries: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class SummaryAgentOutput(BaseModel):

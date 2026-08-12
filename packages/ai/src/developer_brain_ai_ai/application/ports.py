@@ -6,7 +6,10 @@ from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from typing import Protocol
 
+from developer_brain_ai_shared.kernel.id import TenantId
 from pydantic import BaseModel
+
+from developer_brain_ai_ai.domain.aggregates import MemoryFragment
 
 
 @dataclass(frozen=True)
@@ -52,13 +55,17 @@ class AIProvider(Protocol):
 class MemoryService(Protocol):
     """Memoria persistente: grava fragmentos + busca por similaridade anti-repeticao."""
 
-    async def remember(self, fragment) -> None: ...
+    async def remember(self, fragment: MemoryFragment) -> None: ...
 
     async def recall_similar(
-        self, tenant_id, embedding: list[float], top_k: int = 6, source_module: str | None = None
-    ) -> list: ...
+        self,
+        tenant_id: TenantId,
+        embedding: list[float],
+        top_k: int = 6,
+        source_module: str | None = None,
+    ) -> list[MemoryFragment]: ...
 
-    async def already_seen(self, tenant_id, key: str) -> bool: ...
+    async def already_seen(self, tenant_id: TenantId, key: str) -> bool: ...
 
 
 __all__ = [

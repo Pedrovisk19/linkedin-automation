@@ -15,8 +15,12 @@ from developer_brain_ai_content.application.dto import (
     LinkedInDraftOutput,
     ListDraftsOutput,
 )
-from developer_brain_ai_content.application.ports import LinkedInGenerator
+from developer_brain_ai_content.application.ports import (
+    LinkedInGenerator,
+    LinkedInPostPublisher,
+)
 from developer_brain_ai_content.domain.aggregates import ContentDraft, PublicationQueueItem
+from developer_brain_ai_content.domain.ids import ContentDraftId, PublicationQueueItemId
 from developer_brain_ai_content.domain.repositories import (
     ContentDraftRepository,
     PublicationQueueRepository,
@@ -55,7 +59,7 @@ class CreateLinkedInDraft:
 
         now = utcnow()
         draft = ContentDraft(
-            id=object(),
+            id=ContentDraftId.new(),
             tenant_id=tenant_id,
             agent="linkedin",
             content_type=ContentType.LINKEDIN_POST,
@@ -103,7 +107,7 @@ class GenerateLinkedInDraft:
 
         now = utcnow()
         draft = ContentDraft(
-            id=object(),
+            id=ContentDraftId.new(),
             tenant_id=tenant_id,
             agent="linkedin",
             content_type=ContentType.LINKEDIN_POST,
@@ -190,7 +194,7 @@ class EnqueueDraft:
         await self._drafts.save(draft)
         now = utcnow()
         item = PublicationQueueItem(
-            id=object(),
+            id=PublicationQueueItemId.new(),
             tenant_id=tenant_id,
             draft_id=draft.id,
             scheduled_for=scheduled_for or now,
@@ -201,20 +205,39 @@ class EnqueueDraft:
 
 
 class MarkPublished:
+    """Marca um draft como publicado.
+
+    Se um ``LinkedInPostPublisher`` for injetado, publica no LinkedIn ANTES de
+    marcar como publicado — se o LinkedIn falhar (nao conectado, token invalido),
+    o erro propaga e o draft permanece ``queued`` para retry.
+    """
+
     def __init__(
         self,
         drafts: ContentDraftRepository,
         queue: PublicationQueueRepository,
+        publisher: LinkedInPostPublisher | None = None,
     ) -> None:
         self._drafts = drafts
         self._queue = queue
+        self._publisher = publisher
 
-    async def execute(self, tenant_id: TenantId, draft_id: str) -> None:
+    async def execute(self, tenant_id: TenantId, draft_id: str) -> dict[str, str]:
         draft = await self._drafts.get_by_id(tenant_id, draft_id)
         if draft is None:
             raise NotFoundError("draft nao encontrado", details={"id": draft_id})
+
+        post_urn: str | None = None
+        if self._publisher is not None:
+            post_urn = await self._publisher.publish(
+                tenant_id,
+                text=draft.body_markdown,
+                hashtags=[h.display() for h in draft.hashtags],
+            )
+
         draft.mark_published()
         await self._drafts.save(draft)
+        return {"status": "published", "linkedin_post_urn": post_urn or ""}
 
 
 class RejectDraft:

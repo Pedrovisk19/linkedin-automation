@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 
 _HASHTAG_RE = re.compile(r"^[a-zA-Z][a-zA-Z0-9_]{1,49}$")
 
 
-class ContentType(str, Enum):
+class ContentType(StrEnum):
     LINKEDIN_POST = "linkedin_post"
     NEWSLETTER = "newsletter"
     README = "readme"
@@ -17,7 +17,7 @@ class ContentType(str, Enum):
     SUMMARY = "summary"
 
 
-class DraftStatus(str, Enum):
+class DraftStatus(StrEnum):
     PENDING_REVIEW = "pending_review"
     QUEUED = "queued"
     PUBLISHED = "published"

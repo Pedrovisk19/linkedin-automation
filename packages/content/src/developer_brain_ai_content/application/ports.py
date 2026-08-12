@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
 
 from developer_brain_ai_shared.kernel.id import TenantId
 
@@ -17,10 +17,22 @@ class LinkedInGenerator(Protocol):
         self,
         tenant_id: TenantId,
         *,
-        entries: list[dict],
+        entries: list[dict[str, Any]],
         ai_writing_tone: str = ...,
         ai_language: str = ...,
     ) -> LinkedInDraft: ...
 
 
-__all__ = ["LinkedInGenerator"]
+class LinkedInPostPublisher(Protocol):
+    """Publica um post no LinkedIn e devolve a URN criada (implementado em integrations)."""
+
+    async def publish(
+        self,
+        tenant_id: TenantId,
+        *,
+        text: str,
+        hashtags: list[str],
+    ) -> str: ...
+
+
+__all__ = ["LinkedInGenerator", "LinkedInPostPublisher"]

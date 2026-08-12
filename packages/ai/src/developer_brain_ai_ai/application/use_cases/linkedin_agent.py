@@ -12,6 +12,7 @@ import hashlib
 import json
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from typing import Any
 
 from developer_brain_ai_shared.kernel.id import TenantId
 from developer_brain_ai_shared.kernel.timestamp import Timestamps, utcnow
@@ -21,6 +22,7 @@ from developer_brain_ai_ai.application.dto import SummaryAgentOutput  # noqa: F4
 from developer_brain_ai_ai.application.ports import AIProvider, ChatMessage, ChatRequest
 from developer_brain_ai_ai.application.prompt_engine import PromptEngine
 from developer_brain_ai_ai.domain.aggregates import AgentRun
+from developer_brain_ai_ai.domain.ids import AgentRunId
 from developer_brain_ai_ai.domain.repositories import AgentRunRepository
 from developer_brain_ai_ai.domain.value_objects import AgentName, PromptName
 
@@ -47,7 +49,7 @@ class LinkedInDraft(BaseModel):
             v = v[1:]
         return v.lower()
 
-    def __init__(self, **data):  # type: ignore[no-untyped-def]
+    def __init__(self, **data: Any) -> None:
         raw_tags = data.get("hashtags") or []
         data["hashtags"] = [
             self._normalize_tag(t) for t in raw_tags if isinstance(t, str) and t.strip()
@@ -79,7 +81,7 @@ class LinkedInAgent:
         self,
         tenant_id: TenantId,
         *,
-        entries: list[dict],
+        entries: list[dict[str, Any]],
         ai_writing_tone: str = "desenvolvedor-compartilhando-evolucao",
         ai_language: str = "pt-BR",
     ) -> LinkedInDraft:
@@ -118,7 +120,7 @@ class LinkedInAgent:
             json.dumps({"entries": entries}, default=str).encode()
         ).hexdigest()
         run = AgentRun(
-            id=object(),
+            id=AgentRunId.new(),
             tenant_id=tenant_id,
             agent=LINKEDIN_AGENT,
             prompt_name=LINKEDIN_PROMPT,
@@ -133,9 +135,12 @@ class LinkedInAgent:
         await self._runs.save(run)
         return output
 
-    def _render_entries(self, entries: list[dict]) -> str:
+    def _render_entries(self, entries: list[dict[str, Any]]) -> str:
         if not entries:
-            return "(nenhum diario fornecido — gere um post generico sobre o por que compartilhar evolucao)"
+            return (
+                "(nenhum diario fornecido — gere um post generico sobre o por que"
+                " compartilhar evolucao)"
+            )
         lines = []
         for i, e in enumerate(entries, start=1):
             lines.append(
@@ -144,14 +149,19 @@ class LinkedInAgent:
                 f"minutos={e.get('study_minutes', 0)}"
             )
             if e.get("learnings"):
-                lines.append(f"  learnings: {e['learnings'][:300]}")
+                lines.append(f"  learnings: {e['learnings']}")
             if e.get("difficulties"):
-                lines.append(f"  difficulties: {e['difficulties'][:200]}")
+                lines.append(f"  difficulties: {e['difficulties']}")
             if e.get("bugs_found"):
                 lines.append(f"  bugs: {len(e['bugs_found'])}")
+                for b in e.get("bugs_found", [])[:5]:
+                    if isinstance(b, dict):
+                        lines.append(f"    - {b.get('title', '')}: {b.get('resolution', '')}")
+            if e.get("resolutions"):
+                lines.append(f"  resolutions: {e['resolutions']}")
         return "\n".join(lines)
 
-    def _parse_output(self, content: str, entries: list[dict]) -> LinkedInDraft:
+    def _parse_output(self, content: str, entries: list[dict[str, Any]]) -> LinkedInDraft:
         try:
             payload = json.loads(content)
             if not isinstance(payload, dict):

@@ -1,7 +1,12 @@
 """Routers do modulo ai. SEM `from __future__ import annotations` (ADR-0012)."""
 
-from typing import Annotated
+from collections.abc import Awaitable, Callable
+from typing import Annotated, Any
 
+from developer_brain_ai_identity.presentation.dependencies import (
+    CurrentUser,
+    CurrentUserDependency,
+)
 from fastapi import APIRouter, Depends
 
 from developer_brain_ai_ai.application.dto import SummaryAgentInput
@@ -12,10 +17,9 @@ from developer_brain_ai_ai.presentation.dto import RunSummaryInput, RunSummaryOu
 def build_router(
     *,
     summary_agent: SummaryAgent,
-    journal_list_fn,
-    current_user_dep,
+    journal_list_fn: Callable[..., Awaitable[list[dict[str, Any]]]],
+    current_user_dep: CurrentUserDependency,
 ) -> APIRouter:
-    from developer_brain_ai_identity.presentation.dependencies import CurrentUser
 
     UserDep = Annotated[CurrentUser, Depends(current_user_dep)]
     router = APIRouter(prefix="/ai", tags=["ai"])

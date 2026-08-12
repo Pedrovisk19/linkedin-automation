@@ -7,12 +7,17 @@ tenha todas as tabelas definidas (autogenerate funcional).
 from __future__ import annotations
 
 import asyncio
+import os
 from logging.config import fileConfig
 
 import developer_brain_ai_automation.infrastructure.orm  # noqa: F401
 import developer_brain_ai_content.infrastructure.orm  # noqa: F401
+import developer_brain_ai_discord.infrastructure.orm  # noqa: F401
 import developer_brain_ai_identity.infrastructure.orm  # noqa: F401
+import developer_brain_ai_integrations.infrastructure.orm  # noqa: F401
 import developer_brain_ai_journal.infrastructure.orm  # noqa: F401
+import developer_brain_ai_news.infrastructure.orm  # noqa: F401
+import developer_brain_ai_telegram.infrastructure.orm  # noqa: F401
 from alembic import context
 from developer_brain_ai_shared.persistence.base import Base
 from sqlalchemy import pool
@@ -26,8 +31,13 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 
+def _database_url() -> str:
+    """URL do banco: prioriza DATABASE_URL (CI/cron), senao alembic.ini."""
+    return os.environ.get("DATABASE_URL") or config.get_main_option("sqlalchemy.url")
+
+
 def run_migrations_offline() -> None:
-    url = config.get_main_option("sqlalchemy.url")
+    url = _database_url()
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -51,8 +61,10 @@ def do_run_migrations(connection: Connection) -> None:
 
 
 async def run_migrations_online() -> None:
+    section = config.get_section(config.config_ini_section, {})
+    section["sqlalchemy.url"] = _database_url()
     connectable = async_engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        section,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )

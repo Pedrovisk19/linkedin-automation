@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import asyncio
+import time
+
 import pytest
 from developer_brain_ai_journal.application.dto import (
     CreateJournalEntryInput,
@@ -20,19 +23,18 @@ from journal_fakes import FakeJournalEntryRepository
 
 
 def _create_input(**overrides) -> CreateJournalEntryInput:
-    base = dict(
-        title="Estudei FastAPI",
-        entry_date="2026-08-06",
-        study_minutes=90,
-        technologies=["fastapi", "pydantic"],
-        tags=["fast-api", "back-end"],
-    )
+    base = {
+        "title": "Estudei FastAPI",
+        "entry_date": "2026-08-06",
+        "study_minutes": 90,
+        "technologies": ["fastapi", "pydantic"],
+        "tags": ["fast-api", "back-end"],
+    }
     base.update(overrides)
     return CreateJournalEntryInput(**base)
 
 
 def test_create_returns_full_dto() -> None:
-    import asyncio
 
     repo = FakeJournalEntryRepository()
     uc = CreateJournalEntry(repo)
@@ -48,7 +50,6 @@ def test_create_returns_full_dto() -> None:
 
 
 def test_create_rejects_divergent_bugs_resolutions() -> None:
-    import asyncio
 
     repo = FakeJournalEntryRepository()
     uc = CreateJournalEntry(repo)
@@ -62,7 +63,6 @@ def test_create_rejects_divergent_bugs_resolutions() -> None:
 
 
 def test_get_returns_entry() -> None:
-    import asyncio
 
     repo = FakeJournalEntryRepository()
     tenant = TenantId.new()
@@ -73,7 +73,6 @@ def test_get_returns_entry() -> None:
 
 
 def test_get_unknown_raises_not_found() -> None:
-    import asyncio
 
     with pytest.raises(NotFoundError):
         asyncio.run(
@@ -85,7 +84,6 @@ def test_get_unknown_raises_not_found() -> None:
 
 
 def test_list_filters_by_tag() -> None:
-    import asyncio
 
     repo = FakeJournalEntryRepository()
     tenant = TenantId.new()
@@ -103,7 +101,6 @@ def test_list_filters_by_tag() -> None:
 
 
 def test_list_filters_by_technology() -> None:
-    import asyncio
 
     repo = FakeJournalEntryRepository()
     tenant = TenantId.new()
@@ -120,12 +117,10 @@ def test_list_filters_by_technology() -> None:
 
 
 def test_update_changes_fields_and_touches_timestamp() -> None:
-    import asyncio
 
     repo = FakeJournalEntryRepository()
     tenant = TenantId.new()
     out = asyncio.run(CreateJournalEntry(repo).execute(tenant, _create_input(title="Old")))
-    import time
 
     time.sleep(0.01)
     updated = asyncio.run(
@@ -142,7 +137,6 @@ def test_update_changes_fields_and_touches_timestamp() -> None:
 
 
 def test_update_unknown_raises_not_found() -> None:
-    import asyncio
 
     with pytest.raises(NotFoundError):
         asyncio.run(
@@ -155,7 +149,6 @@ def test_update_unknown_raises_not_found() -> None:
 
 
 def test_update_rejects_bugs_found_without_resolutions() -> None:
-    import asyncio
 
     repo = FakeJournalEntryRepository()
     tenant = TenantId.new()
@@ -171,7 +164,6 @@ def test_update_rejects_bugs_found_without_resolutions() -> None:
 
 
 def test_delete_returns_silent_when_existing() -> None:
-    import asyncio
 
     repo = FakeJournalEntryRepository()
     tenant = TenantId.new()
@@ -182,7 +174,6 @@ def test_delete_returns_silent_when_existing() -> None:
 
 
 def test_delete_unknown_raises_not_found() -> None:
-    import asyncio
 
     with pytest.raises(NotFoundError):
         asyncio.run(
@@ -194,7 +185,6 @@ def test_delete_unknown_raises_not_found() -> None:
 
 
 def test_isolation_between_tenants() -> None:
-    import asyncio
 
     repo = FakeJournalEntryRepository()
     t1, t2 = TenantId.new(), TenantId.new()
@@ -205,7 +195,6 @@ def test_isolation_between_tenants() -> None:
 
 
 def test_list_pagination_returns_only_first_page() -> None:
-    import asyncio
 
     repo = FakeJournalEntryRepository()
     tenant = TenantId.new()

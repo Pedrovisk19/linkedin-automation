@@ -29,7 +29,7 @@ from developer_brain_ai_content.infrastructure.orm import (
 
 
 def _ensure_id(aggregate: ContentDraft | PublicationQueueItem) -> None:
-    if not isinstance(aggregate.id, uuid.UUID):
+    if aggregate.id is None:
         object.__setattr__(aggregate, "id", uuid.uuid4())
 
 

@@ -82,7 +82,7 @@ def test_summary_agent_persists_agent_run_with_version_hash() -> None:
     runs = FakeAgentRunRepository()
     agent = SummaryAgent(provider=provider, prompt_engine=PromptEngine(PROMPTS), runs=runs)
 
-    out = asyncio.run(
+    asyncio.run(
         agent.execute(
             TenantId.new(),
             SummaryAgentInput(

@@ -6,6 +6,7 @@ import uuid
 from datetime import UTC, datetime
 
 from developer_brain_ai_content.domain.aggregates import ContentDraft, PublicationQueueItem
+from developer_brain_ai_content.domain.ids import ContentDraftId, PublicationQueueItemId
 from developer_brain_ai_content.domain.value_objects import ContentType, DraftStatus, Hashtag
 from developer_brain_ai_content.infrastructure.mappers import (
     draft_from_orm,
@@ -20,7 +21,7 @@ from developer_brain_ai_shared.kernel.timestamp import Timestamps, utcnow
 def _draft() -> ContentDraft:
     now = utcnow()
     return ContentDraft(
-        id=uuid.uuid4(),
+        id=ContentDraftId(uuid.uuid4()),
         tenant_id=TenantId.new(),
         agent="linkedin",
         content_type=ContentType.LINKEDIN_POST,
@@ -36,7 +37,7 @@ def _draft() -> ContentDraft:
 def test_draft_roundtrip_preserves_all_fields() -> None:
     d = _draft()
     o = draft_to_orm(d)
-    assert o.id == d.id
+    assert o.id == d.id.as_uuid()
     assert o.tenant_id == d.tenant_id.as_uuid()
     assert o.content_type == "linkedin_post"
     assert o.hashtags == ["fastapi", "python"]
@@ -69,9 +70,9 @@ def test_draft_roundtrip_empty_lists() -> None:
 def test_queue_item_roundtrip() -> None:
     now = datetime(2026, 8, 10, 12, 0, tzinfo=UTC)
     item = PublicationQueueItem(
-        id=uuid.uuid4(),
+        id=PublicationQueueItemId(uuid.uuid4()),
         tenant_id=TenantId.new(),
-        draft_id=uuid.uuid4(),
+        draft_id=ContentDraftId(uuid.uuid4()),
         scheduled_for=now,
         queued_at=now,
         published_at=None,
@@ -89,9 +90,9 @@ def test_queue_item_roundtrip_with_published_at() -> None:
     now = datetime(2026, 8, 10, 12, 0, tzinfo=UTC)
     published = datetime(2026, 8, 10, 12, 30, tzinfo=UTC)
     item = PublicationQueueItem(
-        id=uuid.uuid4(),
+        id=PublicationQueueItemId(uuid.uuid4()),
         tenant_id=TenantId.new(),
-        draft_id=uuid.uuid4(),
+        draft_id=ContentDraftId(uuid.uuid4()),
         scheduled_for=now,
         queued_at=now,
         published_at=published,

@@ -39,6 +39,9 @@ dev = [
     "mypy>=1.13",
     "types-redis",
     "types-python-jose",
+    # bot do Discord só roda na API, mas o venv dev precisa da lib p/ tests/lint
+    "discord.py>=2.7",
+    "feedparser>=6.0",
 ]
 
 # ===== UV workspace (PEP 735) =====
@@ -58,6 +61,9 @@ developer-brain-ai-content    = { workspace = true }
 developer-brain-ai-integrations = { workspace = true }
 developer-brain-ai-rag        = { workspace = true }
 developer-brain-ai-automation = { workspace = true }
+developer-brain-ai-telegram  = { workspace = true }
+developer-brain-ai-discord   = { workspace = true }
+developer-brain-ai-news      = { workspace = true }
 
 # ===== Black =====
 [tool.black]
@@ -80,7 +86,7 @@ exclude = '''(?x)(
 )'''
 
 [[tool.mypy.overrides]]
-module = "arq.*,pgvector.*"
+module = "arq.*,pgvector.*,discord.*"
 ignore_missing_imports = true
 
 # ===== Pytest =====
@@ -101,6 +107,9 @@ pythonpath = [
   "packages/integrations/src",
   "packages/rag/src",
   "packages/automation/src",
+  "packages/telegram/src",
+  "packages/discord/src",
+  "packages/news/src",
   "apps/api",
   "apps/worker",
 ]

@@ -38,7 +38,7 @@ def _create() -> tuple[
 
 
 def test_create_linkedin_returns_dto_with_metadata_fields() -> None:
-    drafts, _, uc = _create()
+    _drafts, _, uc = _create()
     out = asyncio.run(
         uc.execute(
             TenantId.new(),
@@ -148,6 +148,43 @@ def test_publish_marks_draft_published() -> None:
     asyncio.run(MarkPublished(drafts, queue).execute(tid, out.draft_id))
     d = asyncio.run(drafts.get_by_id(tid, out.draft_id))
     assert d.status.value == "published"
+
+
+def test_publish_with_publisher_calls_linkedin_first() -> None:
+    drafts, queue, create_uc = _create()
+    calls: list[dict] = []
+
+    class _FakePublisher:
+        async def publish(self, tenant_id, *, text, hashtags) -> str:
+            calls.append({"tenant_id": tenant_id, "text": text, "hashtags": hashtags})
+            return "urn:li:share:111"
+
+    tid = TenantId.new()
+    out = asyncio.run(create_uc.execute(tid, CreateLinkedInDraftInput(title="x", texto="y")))
+    asyncio.run(EnqueueDraft(drafts, queue).execute(tid, out.draft_id))
+    result = asyncio.run(MarkPublished(drafts, queue, _FakePublisher()).execute(tid, out.draft_id))
+    assert result == {"status": "published", "linkedin_post_urn": "urn:li:share:111"}
+    assert len(calls) == 1
+    assert calls[0]["tenant_id"] == tid
+    assert calls[0]["text"] == "y"
+    d = asyncio.run(drafts.get_by_id(tid, out.draft_id))
+    assert d.status.value == "published"
+
+
+def test_publish_with_publisher_failure_keeps_queued() -> None:
+    drafts, queue, create_uc = _create()
+
+    class _FailingPublisher:
+        async def publish(self, tenant_id, *, text, hashtags) -> str:
+            raise ValidationError("linkedin nao conectado")
+
+    tid = TenantId.new()
+    out = asyncio.run(create_uc.execute(tid, CreateLinkedInDraftInput(title="x", texto="y")))
+    asyncio.run(EnqueueDraft(drafts, queue).execute(tid, out.draft_id))
+    with pytest.raises(ValidationError):
+        asyncio.run(MarkPublished(drafts, queue, _FailingPublisher()).execute(tid, out.draft_id))
+    d = asyncio.run(drafts.get_by_id(tid, out.draft_id))
+    assert d.status.value == "queued"
 
 
 def test_reject_marks_rejected() -> None:

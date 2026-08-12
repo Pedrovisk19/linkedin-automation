@@ -30,6 +30,7 @@ class Settings(BaseSettings):
 
     ai_provider_default: str = "openai"
     openai_api_key: str = ""
+    openai_base_url: str = ""
     openai_chat_model: str = "gpt-4o-mini"
     openai_embedding_model: str = "text-embedding-3-large"
     ai_temperature: float = 0.4
@@ -45,6 +46,19 @@ class Settings(BaseSettings):
 
     obsidian_vault_path: str = "./data/obsidian-vault"
     tenant_default_id: str = "00000000-0000-0000-0000-000000000000"
+
+    linkedin_client_id: str = ""
+    linkedin_client_secret: str = ""
+    linkedin_redirect_uri: str = ""
+
+    telegram_bot_token: str = ""
+    telegram_allowed_chat_id: str = ""
+    telegram_tenant_id: str = ""
+    telegram_polling: bool = True
+
+    discord_bot_token: str = ""
+    discord_allowed_channel_id: str = ""
+    discord_tenant_id: str = ""
 
 
 @lru_cache

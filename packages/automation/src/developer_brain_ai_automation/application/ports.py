@@ -7,7 +7,7 @@ e o worker (app) faz o wiring com os adaptadores reais.
 from __future__ import annotations
 
 from datetime import date, datetime
-from typing import Protocol
+from typing import Any, Protocol
 
 from developer_brain_ai_shared.kernel.id import TenantId
 
@@ -21,13 +21,13 @@ class TenantLister(Protocol):
 class DailyEntryReader(Protocol):
     """Le diario do tenant (entries do journal) para um dia especifico."""
 
-    async def list_entries(self, *, tenant_id: TenantId, day: date) -> list[dict]: ...
+    async def list_entries(self, *, tenant_id: TenantId, day: date) -> list[dict[str, Any]]: ...
 
 
 class DailySummaryGenerator(Protocol):
     """Gera o resumo diario a partir das entries (SummaryAgent real no worker)."""
 
-    async def generate(self, *, tenant_id: TenantId, entries: list[dict]) -> str: ...
+    async def generate(self, *, tenant_id: TenantId, entries: list[dict[str, Any]]) -> str: ...
 
 
 class LinkedInDraftCreator(Protocol):
@@ -36,7 +36,7 @@ class LinkedInDraftCreator(Protocol):
     Retorna o id do draft criado (ContentDraft). Em caso de falha, raise.
     """
 
-    async def create(self, *, tenant_id: TenantId, entries: list[dict]) -> str: ...
+    async def create(self, *, tenant_id: TenantId, entries: list[dict[str, Any]]) -> str: ...
 
 
 class DraftQueuer(Protocol):

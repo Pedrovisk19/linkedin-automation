@@ -6,6 +6,7 @@ import hashlib
 import json
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from typing import Any
 
 from developer_brain_ai_shared.kernel.id import TenantId
 from developer_brain_ai_shared.kernel.timestamp import Timestamps, utcnow
@@ -14,6 +15,7 @@ from developer_brain_ai_ai.application.dto import SummaryAgentInput, SummaryAgen
 from developer_brain_ai_ai.application.ports import AIProvider, ChatMessage, ChatRequest
 from developer_brain_ai_ai.application.prompt_engine import PromptEngine
 from developer_brain_ai_ai.domain.aggregates import AgentRun
+from developer_brain_ai_ai.domain.ids import AgentRunId
 from developer_brain_ai_ai.domain.repositories import AgentRunRepository
 from developer_brain_ai_ai.domain.value_objects import AgentName, PromptName
 
@@ -82,7 +84,7 @@ class SummaryAgent:
         ).hexdigest()
 
         run = AgentRun(
-            id=object(),
+            id=AgentRunId.new(),
             tenant_id=tenant_id,
             agent=SUMMARY_AGENT,
             prompt_name=SUMMARY_PROMPT,
@@ -97,7 +99,7 @@ class SummaryAgent:
         await self._runs.save(run)
         return output
 
-    def _render_entries(self, entries: list[dict]) -> str:
+    def _render_entries(self, entries: list[dict[str, Any]]) -> str:
         if not entries:
             return "(nenhum registro neste periodo)"
         lines = []

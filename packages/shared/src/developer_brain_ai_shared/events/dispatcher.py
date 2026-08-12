@@ -8,11 +8,10 @@ publica em uma outbox (Fase 11).
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from typing import TypeAlias
 
 from developer_brain_ai_shared.events.base import DomainEvent
 
-EventHandler: TypeAlias = Callable[[DomainEvent], Awaitable[None] | None]
+type EventHandler = Callable[[DomainEvent], Awaitable[None] | None]
 
 
 class EventDispatcher:

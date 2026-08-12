@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import uuid
 from dataclasses import dataclass
 
+import pytest
 from developer_brain_ai_shared.events.base import DomainEvent
 from developer_brain_ai_shared.kernel import AggregateRoot, Entity, TenantId, UserId
 from developer_brain_ai_shared.kernel.timestamp import Timestamps, utcnow
@@ -43,7 +45,6 @@ def test_typed_id_lt_returns_notimplemented_for_mismatched_type() -> None:
 
 
 def test_typed_id_as_uuid_roundtrips() -> None:
-    import uuid
 
     raw = "12345678-1234-5678-1234-567812345678"
     assert TenantId(raw).as_uuid() == uuid.UUID(raw)
@@ -61,7 +62,6 @@ def test_typed_id_eq_with_other_object_returns_false() -> None:
 
 
 def test_typed_id_constructor_rejects_int() -> None:
-    import pytest
 
     with pytest.raises(TypeError):
         TenantId(123)
