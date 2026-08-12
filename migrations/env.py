@@ -8,7 +8,16 @@ from __future__ import annotations
 
 import asyncio
 import os
+import sys
 from logging.config import fileConfig
+from pathlib import Path
+
+# Garante import de todos os bounded contexts (packages/*/src) mesmo quando o
+# venv nao tem os members instalados como editables (ex.: CI com uv sync).
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+for _pkg_src in sorted((_REPO_ROOT / "packages").glob("*/src")):
+    if str(_pkg_src) not in sys.path:
+        sys.path.insert(0, str(_pkg_src))
 
 import developer_brain_ai_automation.infrastructure.orm  # noqa: F401
 import developer_brain_ai_content.infrastructure.orm  # noqa: F401

@@ -22,6 +22,7 @@ fixable = ["ALL"]
 "tests/**/*" = ["S101", "PLR2004"]
 "docs/**/*"  = ["E501"]
 "migrations/**/*" = ["E501"]
+"migrations/env.py" = ["E402"]
 
 [format]
 docstring-code-format = true
