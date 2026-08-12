@@ -12,7 +12,4 @@ services:
       target: api
     restart: unless-stopped
     env_file: [../.env]
-    environment:
-      # Garante que DATABASE_URL do .env chega ao processo (override do alembic.ini)
-      DATABASE_URL: ${DATABASE_URL}
     ports: ["8000:8000"]
