@@ -26,6 +26,7 @@ fi
 # ---- Docker ------------------------------------------------------------------
 if ! command -v docker &>/dev/null; then
   echo "[docker] instalando..."
+  sudo rm -f /etc/apt/sources.list.d/docker.list /etc/apt/keyrings/docker.gpg
   sudo apt-get update -qq
   sudo apt-get install -y -qq ca-certificates curl gnupg
   sudo install -m 0755 -d /etc/apt/keyrings
