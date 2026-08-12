@@ -226,13 +226,13 @@ def create_app() -> FastAPI:  # noqa: PLR0915 — composition root agrega todos 
 
     linkedin_generator = None
     if openai_client is not None:
-        is_groq = "groq.com" in settings.openai_base_url
+        use_structured = not settings.openai_base_url.strip() or "openai.com" in settings.openai_base_url
         linkedin_generator = LinkedInAgent(
             provider=OpenAIProvider(
                 client=openai_client,
                 chat_model=settings.openai_chat_model,
                 embedding_model=settings.openai_embedding_model,
-                use_structured_outputs=not is_groq,
+                use_structured_outputs=use_structured,
             ),
             prompt_engine=PromptEngine(_Path("prompts")),
             runs=_NoopRunRepo(),
@@ -244,13 +244,13 @@ def create_app() -> FastAPI:  # noqa: PLR0915 — composition root agrega todos 
 
     news_digest_generator = None
     if openai_client is not None:
-        is_groq = "groq.com" in settings.openai_base_url
+        use_structured = not settings.openai_base_url.strip() or "openai.com" in settings.openai_base_url
         news_digest_generator = NewsDigestAgent(
             provider=OpenAIProvider(
                 client=openai_client,
                 chat_model=settings.openai_chat_model,
                 embedding_model=settings.openai_embedding_model,
-                use_structured_outputs=not is_groq,
+                use_structured_outputs=use_structured,
             ),
             prompt_engine=PromptEngine(_Path("prompts")),
             runs=_NoopRunRepo(),

@@ -106,18 +106,18 @@ def _build_pipeline():
     queue_repo = SqlAlchemyPublicationQueueRepository(session_factory)
 
     openai_client = AsyncOpenAI(api_key=_settings.openai_api_key)
-    is_groq = "groq.com" in _settings.openai_base_url
     if _settings.openai_base_url.strip():
         openai_client = AsyncOpenAI(
             api_key=_settings.openai_api_key,
             base_url=_settings.openai_base_url.strip(),
             http_client=httpx.AsyncClient(timeout=60.0),
         )
+    use_structured = not _settings.openai_base_url.strip() or "openai.com" in _settings.openai_base_url
     provider = OpenAIProvider(
         client=openai_client,
         chat_model=_settings.openai_chat_model,
         embedding_model=_settings.openai_embedding_model,
-        use_structured_outputs=not is_groq,
+        use_structured_outputs=use_structured,
     )
     prompt_engine = PromptEngine(Path("prompts"))
     runs_repo = _noop_run_repo()
@@ -270,7 +270,7 @@ def build_news_stack(session_factory, *, prompts_dir: Path = Path("prompts")):
         repo=news_repo,
     )
 
-    is_groq = "groq.com" in _settings.openai_base_url
+    is_openai_direct = not _settings.openai_base_url.strip() or "openai.com" in _settings.openai_base_url
     openai_client_news = AsyncOpenAI(
         api_key=_settings.openai_api_key,
         base_url=_settings.openai_base_url.strip() or None,
@@ -280,7 +280,7 @@ def build_news_stack(session_factory, *, prompts_dir: Path = Path("prompts")):
             client=openai_client_news,
             chat_model=_settings.openai_chat_model,
             embedding_model=_settings.openai_embedding_model,
-            use_structured_outputs=not is_groq,
+            use_structured_outputs=is_openai_direct,
         ),
         prompt_engine=PromptEngine(prompts_dir),
         runs=_noop_run_repo(),
