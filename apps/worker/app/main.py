@@ -228,7 +228,7 @@ def _build_digest_notifier(session_factory):
     try:
         channel = ChannelId(int(channel_raw))
         discord_tenant = TenantId(uuid.UUID(discord_tenant_raw))
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         return None
 
     requests_repo = SqlAlchemyDiscordRequestRepository(session_factory)

@@ -154,9 +154,7 @@ async def _handle_message(
         reset_tenant_context()
 
 
-def _allowed_chat_of(
-    raw: Any, allowed_chat: ChatId | None, kind: str
-) -> ChatId | None:
+def _allowed_chat_of(raw: Any, allowed_chat: ChatId | None, kind: str) -> ChatId | None:
     if raw is None:
         return None
     chat_id = _chat_id_or_none(raw)
@@ -212,7 +210,7 @@ def _is_allowed(chat_id: ChatId, allowed_chat: ChatId | None) -> bool:
 def _chat_id_or_none(raw: Any) -> ChatId | None:
     try:
         return ChatId(int(raw))
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         return None
 
 

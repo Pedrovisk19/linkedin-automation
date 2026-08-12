@@ -74,9 +74,7 @@ class HttpTelegramClient:
         await self._call("sendMessage", payload)
 
     async def answer_callback(self, callback_query_id: str) -> None:
-        await self._call(
-            "answerCallbackQuery", {"callback_query_id": callback_query_id}
-        )
+        await self._call("answerCallbackQuery", {"callback_query_id": callback_query_id})
 
     async def download_audio(self, media_id: str) -> AudioMedia:
         file_info = await self._call("getFile", {"file_id": media_id})

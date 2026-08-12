@@ -242,9 +242,7 @@ def test_approval_unknown_request_notifies() -> None:
         messenger=messenger,
         requests=FakeTelegramRequestRepository(),
         enqueue=EnqueueDraft(FakeContentDraftRepository(), FakePublicationQueueRepository()),
-        publish=MarkPublished(
-            FakeContentDraftRepository(), FakePublicationQueueRepository()
-        ),  # type: ignore[arg-type]
+        publish=MarkPublished(FakeContentDraftRepository(), FakePublicationQueueRepository()),  # type: ignore[arg-type]
         reject=RejectDraft(FakeContentDraftRepository()),
     )
     asyncio.run(

@@ -24,9 +24,7 @@ class SqlAlchemyTelegramRequestRepository(TelegramRequestRepository):
     def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
         self._factory = session_factory
 
-    async def get_by_id(
-        self, tenant_id: TenantId, request_id: object
-    ) -> TelegramRequest | None:
+    async def get_by_id(self, tenant_id: TenantId, request_id: object) -> TelegramRequest | None:
         async with self._factory() as session:
             row = await session.get(TelegramRequestORM, str(request_id))
             if row is None or row.tenant_id != tenant_id.as_uuid():

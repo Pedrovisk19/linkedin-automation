@@ -341,9 +341,7 @@ def create_app() -> FastAPI:  # noqa: PLR0915 — composition root agrega todos 
         _channel = discord_wiring.allowed_channel
 
         class _DigestNotifierAdapter:
-            async def send(
-                self, *, tenant_id: object, draft_id: str, title: str, body: str
-            ) -> str:
+            async def send(self, *, tenant_id: object, draft_id: str, title: str, body: str) -> str:
                 return await _send_draft.execute(
                     tenant_id=discord_wiring.tenant_id,
                     channel_id=_channel,

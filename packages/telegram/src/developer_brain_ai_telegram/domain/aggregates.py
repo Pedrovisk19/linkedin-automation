@@ -40,17 +40,13 @@ class TelegramRequest(AggregateRoot):
 
     def approve(self) -> None:
         if self.status is not RequestStatus.PENDING:
-            raise ValidationError(
-                "pedido ja processado", details={"status": self.status.value}
-            )
+            raise ValidationError("pedido ja processado", details={"status": self.status.value})
         object.__setattr__(self, "status", RequestStatus.APPROVED)
         _touch(self)
 
     def reject(self) -> None:
         if self.status is not RequestStatus.PENDING:
-            raise ValidationError(
-                "pedido ja processado", details={"status": self.status.value}
-            )
+            raise ValidationError("pedido ja processado", details={"status": self.status.value})
         object.__setattr__(self, "status", RequestStatus.REJECTED)
         _touch(self)
 

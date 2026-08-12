@@ -1,4 +1,4 @@
-﻿"""integrations: refresh_token/refresh_expires_at opcionais em linkedin_tokens.
+"""integrations: refresh_token/refresh_expires_at opcionais em linkedin_tokens.
 
 Revision ID: 0006_linkedin_optional_refresh
 

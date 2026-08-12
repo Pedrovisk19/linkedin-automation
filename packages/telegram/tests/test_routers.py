@@ -35,9 +35,7 @@ TID = TenantId.new()
 
 def _build_app(
     allowed_chat: ChatId | None = CHAT,
-) -> tuple[
-    FastAPI, FakeMessenger, FakeTelegramRequestRepository, FakeContentDraftRepository
-]:
+) -> tuple[FastAPI, FakeMessenger, FakeTelegramRequestRepository, FakeContentDraftRepository]:
     messenger = FakeMessenger()
     requests = FakeTelegramRequestRepository()
     drafts = FakeContentDraftRepository()

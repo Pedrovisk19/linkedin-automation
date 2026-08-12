@@ -28,16 +28,39 @@ def upgrade() -> None:
     bind.execute(sa.text("ALTER TABLE telegram_requests RENAME COLUMN phone TO chat_id"))
     bind.execute(
         sa.text(
-            "ALTER TABLE telegram_requests "
-            "ALTER COLUMN chat_id TYPE bigint USING chat_id::bigint"
+            "ALTER TABLE telegram_requests ALTER COLUMN chat_id TYPE bigint USING chat_id::bigint"
         )
     )
-    bind.execute(sa.text("ALTER TABLE telegram_requests RENAME CONSTRAINT whatsapp_requests_pkey TO telegram_requests_pkey"))
-    bind.execute(sa.text("ALTER TABLE telegram_requests RENAME CONSTRAINT whatsapp_requests_draft_id_fkey TO telegram_requests_draft_id_fkey"))
-    bind.execute(sa.text("ALTER TABLE telegram_requests RENAME CONSTRAINT whatsapp_requests_tenant_id_fkey TO telegram_requests_tenant_id_fkey"))
-    bind.execute(sa.text("ALTER INDEX ix_whatsapp_requests_tenant_id RENAME TO ix_telegram_requests_tenant_id"))
-    bind.execute(sa.text("ALTER INDEX ix_whatsapp_requests_tenant_id_id RENAME TO ix_telegram_requests_tenant_id_id"))
-    bind.execute(sa.text("ALTER INDEX ix_whatsapp_requests_tenant_phone_status RENAME TO ix_telegram_requests_tenant_chat_status"))
+    bind.execute(
+        sa.text(
+            "ALTER TABLE telegram_requests RENAME CONSTRAINT whatsapp_requests_pkey TO telegram_requests_pkey"
+        )
+    )
+    bind.execute(
+        sa.text(
+            "ALTER TABLE telegram_requests RENAME CONSTRAINT whatsapp_requests_draft_id_fkey TO telegram_requests_draft_id_fkey"
+        )
+    )
+    bind.execute(
+        sa.text(
+            "ALTER TABLE telegram_requests RENAME CONSTRAINT whatsapp_requests_tenant_id_fkey TO telegram_requests_tenant_id_fkey"
+        )
+    )
+    bind.execute(
+        sa.text(
+            "ALTER INDEX ix_whatsapp_requests_tenant_id RENAME TO ix_telegram_requests_tenant_id"
+        )
+    )
+    bind.execute(
+        sa.text(
+            "ALTER INDEX ix_whatsapp_requests_tenant_id_id RENAME TO ix_telegram_requests_tenant_id_id"
+        )
+    )
+    bind.execute(
+        sa.text(
+            "ALTER INDEX ix_whatsapp_requests_tenant_phone_status RENAME TO ix_telegram_requests_tenant_chat_status"
+        )
+    )
 
 
 def downgrade() -> None:
@@ -51,9 +74,33 @@ def downgrade() -> None:
             "ALTER COLUMN phone TYPE varchar(20) USING phone::varchar(20)"
         )
     )
-    bind.execute(sa.text("ALTER TABLE whatsapp_requests RENAME CONSTRAINT telegram_requests_pkey TO whatsapp_requests_pkey"))
-    bind.execute(sa.text("ALTER TABLE whatsapp_requests RENAME CONSTRAINT telegram_requests_draft_id_fkey TO whatsapp_requests_draft_id_fkey"))
-    bind.execute(sa.text("ALTER TABLE whatsapp_requests RENAME CONSTRAINT telegram_requests_tenant_id_fkey TO whatsapp_requests_tenant_id_fkey"))
-    bind.execute(sa.text("ALTER INDEX ix_telegram_requests_tenant_id RENAME TO ix_whatsapp_requests_tenant_id"))
-    bind.execute(sa.text("ALTER INDEX ix_telegram_requests_tenant_id_id RENAME TO ix_whatsapp_requests_tenant_id_id"))
-    bind.execute(sa.text("ALTER INDEX ix_telegram_requests_tenant_chat_status RENAME TO ix_whatsapp_requests_tenant_phone_status"))
+    bind.execute(
+        sa.text(
+            "ALTER TABLE whatsapp_requests RENAME CONSTRAINT telegram_requests_pkey TO whatsapp_requests_pkey"
+        )
+    )
+    bind.execute(
+        sa.text(
+            "ALTER TABLE whatsapp_requests RENAME CONSTRAINT telegram_requests_draft_id_fkey TO whatsapp_requests_draft_id_fkey"
+        )
+    )
+    bind.execute(
+        sa.text(
+            "ALTER TABLE whatsapp_requests RENAME CONSTRAINT telegram_requests_tenant_id_fkey TO whatsapp_requests_tenant_id_fkey"
+        )
+    )
+    bind.execute(
+        sa.text(
+            "ALTER INDEX ix_telegram_requests_tenant_id RENAME TO ix_whatsapp_requests_tenant_id"
+        )
+    )
+    bind.execute(
+        sa.text(
+            "ALTER INDEX ix_telegram_requests_tenant_id_id RENAME TO ix_whatsapp_requests_tenant_id_id"
+        )
+    )
+    bind.execute(
+        sa.text(
+            "ALTER INDEX ix_telegram_requests_tenant_chat_status RENAME TO ix_whatsapp_requests_tenant_phone_status"
+        )
+    )

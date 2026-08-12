@@ -47,7 +47,7 @@ def _parse_date(raw: str | None) -> datetime:
         if dt.tzinfo is None:
             dt = dt.replace(tzinfo=UTC)
         return dt
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         return datetime.now(UTC)
 
 
@@ -269,7 +269,7 @@ class GitHubTrendingFetcher:
                             if created_raw
                             else datetime.now(UTC)
                         )
-                    except (ValueError, TypeError):
+                    except ValueError, TypeError:
                         published = datetime.now(UTC)
                     items.append(
                         FetchedItem(

@@ -13,9 +13,7 @@ class FakeTelegramRequestRepository:
     def __init__(self) -> None:
         self._by_id: dict[str, TelegramRequest] = {}
 
-    async def get_by_id(
-        self, tenant_id: TenantId, request_id: object
-    ) -> TelegramRequest | None:
+    async def get_by_id(self, tenant_id: TenantId, request_id: object) -> TelegramRequest | None:
         r = self._by_id.get(str(request_id))
         if r is None or r.tenant_id != tenant_id:
             return None
@@ -51,9 +49,7 @@ class FakeMessenger:
     async def send_text(self, *, to, text: str) -> None:
         self.sent.append(_SentMessage(kind="text", to=to.value, text=text))
 
-    async def send_approval_request(
-        self, *, to, request_id: str, title: str, body: str
-    ) -> None:
+    async def send_approval_request(self, *, to, request_id: str, title: str, body: str) -> None:
         self.sent.append(
             _SentMessage(
                 kind="approval",

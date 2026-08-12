@@ -63,9 +63,7 @@ class NewsDigestDraft(BaseModel):
 
     def __init__(self, **data: Any) -> None:
         raw_tags = data.get("hashtags") or []
-        normalized = [
-            self._normalize_tag(t) for t in raw_tags if isinstance(t, str) and t.strip()
-        ]
+        normalized = [self._normalize_tag(t) for t in raw_tags if isinstance(t, str) and t.strip()]
         data["hashtags"] = [t for t in normalized if _HASHTAG_RE.match(t)]
         super().__init__(**data)
 
@@ -130,9 +128,7 @@ class NewsDigestAgent:
         source_ids = [str(i.get("id", "")) for i in items if i.get("id")]
         output = self._parse_output(response.content, source_ids)
 
-        inputs_hash = hashlib.sha256(
-            json.dumps({"items": items}, default=str).encode()
-        ).hexdigest()
+        inputs_hash = hashlib.sha256(json.dumps({"items": items}, default=str).encode()).hexdigest()
         run = AgentRun(
             id=AgentRunId.new(),
             tenant_id=tenant_id,
@@ -154,9 +150,7 @@ class NewsDigestAgent:
             return "(nenhum item fornecido — gere um digest generico sobre Python)"
         lines = []
         for i, item in enumerate(items, start=1):
-            lines.append(
-                f"- {i}. [{item.get('source', '?')}] {item.get('title', 'sem titulo')}"
-            )
+            lines.append(f"- {i}. [{item.get('source', '?')}] {item.get('title', 'sem titulo')}")
             lines.append(f"  url: {item.get('url', '')}")
             summary = (item.get("summary") or "").strip()
             if summary:
@@ -164,9 +158,7 @@ class NewsDigestAgent:
                 lines.append(f"  summary: {first[:400]}")
         return "\n".join(lines)
 
-    def _parse_output(
-        self, content: str, source_url_ids: list[str]
-    ) -> NewsDigestDraft:
+    def _parse_output(self, content: str, source_url_ids: list[str]) -> NewsDigestDraft:
         try:
             payload = json.loads(content)
             if not isinstance(payload, dict):
