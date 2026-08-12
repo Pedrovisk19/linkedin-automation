@@ -162,14 +162,77 @@ class LinkedInAgent:
         return "\n".join(lines)
 
     def _parse_output(self, content: str, entries: list[dict[str, Any]]) -> LinkedInDraft:
-        try:
-            payload = json.loads(content)
-            if not isinstance(payload, dict):
-                raise ValueError
+        payload = self._extract_json_object(content)
+        if payload is not None:
             payload.setdefault(
                 "source_entry_ids", [e.get("id", "") for e in entries if e.get("id")]
             )
             return LinkedInDraft(**payload)
+        return LinkedInDraft(
+            title="Post gerado",
+            texto=content,
+            source_entry_ids=[e.get("id", "") for e in entries if e.get("id")],
+        )
+
+    @staticmethod
+    def _extract_json_object(content: str) -> dict[str, Any] | None:
+        """Extrai um JSON object de resposta LLM tolerando code fences e texto ao redor.
+
+        - Remove code fences ```json ... ``` ou ``` ... ```
+        - Localiza o primeiro ``{`` ate o ultimo ``}`` e tenta ``json.loads``
+        - Retorna ``None`` se nao encontrar JSON valido
+        """
+        text = content.strip()
+        # Remove code fences ```json ... ``` ou ``` ... ```
+        if text.startswith("```"):
+            # descarta a primeira linha (```json ou ```)
+            lines = text.splitlines()
+            if len(lines) >= 2:
+                lines = lines[1:]
+            # remove fence final se existir
+            if lines and lines[-1].strip().startswith("```"):
+                lines = lines[:-1]
+            text = "\n".join(lines).strip()
+        # Tentativa direta
+        try:
+            parsed = json.loads(text)
+            return parsed if isinstance(parsed, dict) else None
+        except json.JSONDecodeError:
+            pass
+        # Fallback: extrair substring entre { e } (usando balanceamento de chaves)
+        start = text.find("{")
+        if start == -1:
+            return None
+        depth = 0
+        in_string = False
+        escape = False
+        end = -1
+        for i, ch in enumerate(text[start:], start=start):
+            if escape:
+                escape = False
+                continue
+            if ch == "\\":
+                escape = True
+                continue
+            if ch == '"':
+                in_string = not in_string
+                continue
+            if in_string:
+                continue
+            if ch == "{":
+                depth += 1
+            elif ch == "}":
+                depth -= 1
+                if depth == 0:
+                    end = i + 1
+                    break
+        if end == -1:
+            return None
+        try:
+            parsed = json.loads(text[start:end])
+            return parsed if isinstance(parsed, dict) else None
+        except json.JSONDecodeError:
+            return None
         except json.JSONDecodeError, ValueError, TypeError:
             return LinkedInDraft(
                 title="Post gerado",

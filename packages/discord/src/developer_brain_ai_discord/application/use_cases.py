@@ -115,7 +115,7 @@ class HandleInboundMessage:
             to=channel_id,
             request_id=str(request.id),
             title=_short_title(draft.title),
-            body=draft.texto,
+            body=_format_draft_body(draft),
         )
         return request
 
@@ -266,6 +266,26 @@ class SendDraftToChannel:
 def _first_line_or_truncate(text: str) -> str:
     first = text.strip().splitlines()[0] if text.strip() else text
     return _truncate(first, 200)
+
+
+def _format_draft_body(draft: Any) -> str:
+    """Formatacao legivel para o Discord: gancho + texto + conclusao + pergunta + cta + hashtags."""
+    parts: list[str] = []
+    if getattr(draft, "gancho", ""):
+        parts.append(f"> {draft.gancho}\n")
+    if getattr(draft, "texto", ""):
+        parts.append(draft.texto)
+    if getattr(draft, "conclusao", ""):
+        parts.append(f"\n**Conclusão:**\n{draft.conclusao}")
+    if getattr(draft, "pergunta", ""):
+        parts.append(f"\n**Pergunta:** {draft.pergunta}")
+    if getattr(draft, "cta", ""):
+        parts.append(f"\n**CTA:** {draft.cta}")
+    tags = getattr(draft, "hashtags", []) or []
+    if tags:
+        hashtags_str = " ".join(f"#{t}" for t in tags)
+        parts.append(f"\n{hashtags_str}")
+    return "\n".join(parts)
 
 
 def _short_title(title: str) -> str:
