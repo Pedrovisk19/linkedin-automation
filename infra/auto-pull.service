@@ -5,5 +5,6 @@ Wants=linkedin-api.service
 
 [Service]
 Type=oneshot
+User=PLACEHOLDER_USER
 WorkingDirectory=PLACEHOLDER_REPO
 ExecStart=PLACEHOLDER_REPO/infra/auto-pull.sh

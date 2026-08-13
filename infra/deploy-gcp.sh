@@ -121,6 +121,7 @@ chmod +x "$REPO_DIR/infra/auto-pull.sh"
 sudo cp "$REPO_DIR/infra/auto-pull.service" /etc/systemd/system/linkedin-auto-pull.service
 sudo cp "$REPO_DIR/infra/auto-pull.timer" /etc/systemd/system/linkedin-auto-pull.timer
 sudo sed -i "s|PLACEHOLDER_REPO|${REPO_DIR}|g" /etc/systemd/system/linkedin-auto-pull.service
+sudo sed -i "s|PLACEHOLDER_USER|$(stat -c %U "$REPO_DIR" 2>/dev/null || echo root)|g" /etc/systemd/system/linkedin-auto-pull.service
 sudo systemctl daemon-reload
 sudo systemctl enable --now linkedin-auto-pull.timer
 

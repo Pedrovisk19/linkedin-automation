@@ -3,6 +3,8 @@
 # Instalado como systemd timer (a cada 2 min) pelo deploy-gcp.sh.
 set -euo pipefail
 
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
 REPO_DIR="${REPO_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
 COMPOSE_FILE="$REPO_DIR/infra/docker-compose.oracle.yml"
 LOG_TAG="auto-pull"
@@ -10,10 +12,11 @@ LOG_TAG="auto-pull"
 cd "$REPO_DIR"
 
 # fetch rapido (sem merge)
-if ! git fetch origin main 2>/dev/null; then
-  echo "[$LOG_TAG] git fetch falhou (sem rede?), abortando."
+FETCH_LOG="$(timeout 30 git fetch origin main 2>&1)" || {
+  echo "[$LOG_TAG] git fetch falhou:"
+  echo "$FETCH_LOG"
   exit 0
-fi
+}
 
 LOCAL=$(git rev-parse HEAD)
 REMOTE=$(git rev-parse origin/main)
