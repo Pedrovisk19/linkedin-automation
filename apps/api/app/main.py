@@ -293,10 +293,9 @@ def create_app() -> FastAPI:  # noqa: PLR0915 — composition root agrega todos 
         mount_content(
             drafts_repo=content_drafts_repo,
             queue_repo=content_queue_repo,
-linkedin_generator=linkedin_generator,
+            linkedin_generator=linkedin_generator,
             linkedin_publisher=linkedin_publisher,
-            openai_client=openai_client,
-            linkedin_auth_builder=linkedin_auth_builder,
+            current_user_dep=current_user_dep,
         )
     )
 
@@ -325,6 +324,7 @@ linkedin_generator=linkedin_generator,
             linkedin_generator=linkedin_generator,
             linkedin_publisher=linkedin_publisher,
             openai_client=openai_client,
+            linkedin_auth_builder=linkedin_auth_builder,
         )
 
     # ===== News: fetch RSS + digest via LLM + envio p/ aprovacao no Discord ==
