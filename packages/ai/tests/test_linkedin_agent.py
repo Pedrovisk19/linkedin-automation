@@ -166,3 +166,32 @@ def test_linkedin_repairs_literal_newlines_inside_json_strings() -> None:
     assert "```python" in out.texto
     assert "session.scalars" in out.texto
     assert "abc-1" in out.source_entry_ids
+
+
+def test_linkedin_repairs_truncated_json_tail() -> None:
+    """O modelo corta a resposta no meio de uma string; json_repair fecha a
+    string e as chaves, e o post deve ser extraido normalmente."""
+
+    raw = '{"title": "T", "gancho": "g", "texto": "1. Topico\\n```python\\nx=1\\n```'
+    provider = FakeAIProvider(chat_response=raw)
+    agent = LinkedInAgent(
+        provider=provider, prompt_engine=PromptEngine(PROMPTS), runs=FakeAgentRunRepository()
+    )
+    out = asyncio.run(agent.execute(TenantId.new(), entries=_entries()))
+    assert out.title == "T"
+    assert out.texto.startswith("1. Topico")
+    assert "abc-1" in out.source_entry_ids
+
+
+def test_linkedin_repairs_unquoted_value_at_tail() -> None:
+    """O modelo deriva no fim do JSON e emite um valor sem aspas (ex.: 'conclusao':
+    Django Project...); json_repair converte o resto em string."""
+
+    raw = '{"title": "T", "texto": "1. Topico", "conclusao": Django Project logo'
+    provider = FakeAIProvider(chat_response=raw)
+    agent = LinkedInAgent(
+        provider=provider, prompt_engine=PromptEngine(PROMPTS), runs=FakeAgentRunRepository()
+    )
+    out = asyncio.run(agent.execute(TenantId.new(), entries=_entries()))
+    assert out.title == "T"
+    assert "Django" in out.conclusao

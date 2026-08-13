@@ -18,6 +18,7 @@ from typing import Any
 from developer_brain_ai_shared.kernel.id import TenantId
 from developer_brain_ai_shared.kernel.timestamp import Timestamps, utcnow
 from developer_brain_ai_shared.logging import get_logger
+from json_repair import repair_json
 from pydantic import BaseModel, Field
 
 from developer_brain_ai_ai.application.dto import SummaryAgentOutput  # noqa: F401
@@ -222,6 +223,8 @@ class LinkedInAgent:
         - Remove code fences ```json ... ``` ou ``` ... ```
         - Repara newlines literais dentro de strings (falha comum de LLM)
         - Localiza o primeiro ``{`` ate o ultimo ``}`` e tenta ``json.loads``
+        - Resgate final via ``json_repair``: strings/objetos truncados pelo modelo,
+          aspas sem escape e chaves nao fechadas
         - Retorna ``None`` se nao encontrar JSON valido
         """
         text = LinkedInAgent._sanitize_json_control_chars(content).strip()
@@ -268,12 +271,17 @@ class LinkedInAgent:
                 if depth == 0:
                     end = i + 1
                     break
-        if end == -1:
-            return None
         try:
             parsed = json.loads(text[start:end])
             return parsed if isinstance(parsed, dict) else None
         except json.JSONDecodeError:
+            pass
+        # Resgate final: reparo generico (truncamento, aspas sem escape, chaves
+        # nao fechadas) — a resposta do LLM quebra no fim com frequencia.
+        try:
+            repaired = repair_json(text, return_objects=True)
+            return repaired if isinstance(repaired, dict) else None
+        except Exception:
             return None
 
 
