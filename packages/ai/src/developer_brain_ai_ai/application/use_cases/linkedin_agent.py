@@ -183,7 +183,7 @@ class LinkedInAgent:
             return LinkedInDraft(**payload)
         get_logger().warning(
             "linkedin fallback: resposta sem JSON valido",
-            raw=content[:2000],
+            raw=content[:6000],
         )
         return LinkedInDraft(
             title="Post gerado",
