@@ -115,6 +115,15 @@ sudo sed -i "s|PLACEHOLDER_REPO|${REPO_DIR}|g" /etc/systemd/system/linkedin-api.
 sudo systemctl daemon-reload
 sudo systemctl enable linkedin-api
 
+# ---- Auto-pull (systemd timer) ------------------------------------------------
+echo "[auto-pull] configurando systemd timer..."
+chmod +x "$REPO_DIR/infra/auto-pull.sh"
+sudo cp "$REPO_DIR/infra/auto-pull.service" /etc/systemd/system/linkedin-auto-pull.service
+sudo cp "$REPO_DIR/infra/auto-pull.timer" /etc/systemd/system/linkedin-auto-pull.timer
+sudo sed -i "s|PLACEHOLDER_REPO|${REPO_DIR}|g" /etc/systemd/system/linkedin-auto-pull.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now linkedin-auto-pull.timer
+
 echo ""
 echo "=== Deploy concluido ==="
 echo "  API:       http://$(curl -s http://checkip.amazonaws.com):8000/healthz"

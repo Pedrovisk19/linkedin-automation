@@ -1,0 +1,9 @@
+[Unit]
+Description=LinkedIn Automation auto-pull (git pull + rebuild on push)
+After=linkedin-api.service
+Wants=linkedin-api.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=PLACEHOLDER_REPO
+ExecStart=PLACEHOLDER_REPO/infra/auto-pull.sh
