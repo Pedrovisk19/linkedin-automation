@@ -168,6 +168,23 @@ def test_linkedin_repairs_literal_newlines_inside_json_strings() -> None:
     assert "abc-1" in out.source_entry_ids
 
 
+def test_linkedin_retries_once_when_provider_returns_empty() -> None:
+    """Gemini pode responder 200 com conteudo vazio (safety/hiccup); o agente
+    refaz a chamada uma vez antes de entregar o fallback."""
+
+    provider = FakeAIProvider(
+        chat_response='{"title": "T", "texto": "1. Topico", "hashtags": ["#ok"]}',
+        empty_first=True,
+    )
+    agent = LinkedInAgent(
+        provider=provider, prompt_engine=PromptEngine(PROMPTS), runs=FakeAgentRunRepository()
+    )
+    out = asyncio.run(agent.execute(TenantId.new(), entries=_entries()))
+    assert provider.calls == 2
+    assert out.title == "T"
+    assert out.texto == "1. Topico"
+
+
 def test_linkedin_repairs_truncated_json_tail() -> None:
     """O modelo corta a resposta no meio de uma string; json_repair fecha a
     string e as chaves, e o post deve ser extraido normalmente."""

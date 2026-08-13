@@ -21,16 +21,19 @@ class FakeAIProvider:
         self,
         *,
         chat_response: str = '{"title":"ok","markdown":"# R","top_learnings":[],"metrics":{}}',
+        empty_first: bool = False,
     ) -> None:
         self._chat_response = chat_response
+        self._empty_first = empty_first
         self.last_request: ChatRequest | None = None
         self.calls = 0
 
     async def chat(self, request: ChatRequest) -> ChatResponse:
         self.calls += 1
         self.last_request = request
+        content = "" if (self._empty_first and self.calls == 1) else self._chat_response
         return ChatResponse(
-            content=self._chat_response, prompt_tokens=10, completion_tokens=20, model="fake-1"
+            content=content, prompt_tokens=10, completion_tokens=20, model="fake-1"
         )
 
     async def chat_stream(self, request: ChatRequest) -> AsyncIterator[str]:

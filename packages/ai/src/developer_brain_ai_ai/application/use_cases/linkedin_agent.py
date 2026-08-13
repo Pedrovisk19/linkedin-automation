@@ -126,6 +126,9 @@ class LinkedInAgent:
         )
         started = datetime.now(UTC)
         response = await self._provider.chat(request)
+        if not response.content.strip():
+            get_logger().warning("resposta vazia do provedor; tentando de novo", model=self._cfg)
+            response = await self._provider.chat(request)
         finished = datetime.now(UTC)
 
         output = self._parse_output(response.content, entries)
