@@ -32,7 +32,7 @@ from developer_brain_ai_discord.domain.ports import (
     Messenger,
 )
 from developer_brain_ai_discord.domain.repositories import DiscordRequestRepository
-from developer_brain_ai_discord.domain.value_objects import ChannelId
+from developer_brain_ai_discord.domain.value_objects import ChannelId, RequestStatus
 
 
 class HandleInboundMessage:
@@ -175,6 +175,14 @@ class HandleApprovalReply:
             )
             return
 
+        if request.status is not RequestStatus.PENDING:
+            kind = "aprovado" if request.status is RequestStatus.APPROVED else "rejeitado"
+            await self._messenger.send_text(
+                to=channel_id,
+                text=f"Esse pedido ja foi {kind}.",
+            )
+            return
+
         try:
             if approved:
                 await self._enqueue.execute(tenant_id, request.draft_id)
@@ -182,14 +190,16 @@ class HandleApprovalReply:
                 request.approve()
                 await self._requests.save(request)
                 urn = result.get("linkedin_post_urn", "")
-                await self._messenger.send_text(
-                    to=channel_id,
-                    text=(
-                        "Publicado no LinkedIn!"
-                        if not urn
-                        else f"Publicado no LinkedIn! Post: {urn}"
-                    ),
-                )
+                if urn:
+                    await self._messenger.send_text(
+                        to=channel_id,
+                        text=f"Publicado no LinkedIn! Post: {urn}",
+                    )
+                else:
+                    await self._messenger.send_text(
+                        to=channel_id,
+                        text="Marcado como publicado, mas LinkedIn nao esta conectado (sem OAuth token). Conecte em /integrations/linkedin",
+                    )
             else:
                 await self._reject.execute(tenant_id, request.draft_id)
                 request.reject()
