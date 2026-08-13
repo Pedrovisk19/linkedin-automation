@@ -125,7 +125,13 @@ class LinkedInAgent:
             response_format=LinkedInDraft,
         )
         started = datetime.now(UTC)
-        response = await self._provider.chat(request)
+        try:
+            response = await self._provider.chat(request)
+        except Exception:
+            # 429/timeout/conn reset sao transitorios em provedores publicos;
+            # uma nova tentativa costuma passar.
+            get_logger().warning("falha transitoria do provedor; tentando de novo")
+            response = await self._provider.chat(request)
         if not response.content.strip():
             get_logger().warning("resposta vazia do provedor; tentando de novo", model=self._cfg)
             response = await self._provider.chat(request)

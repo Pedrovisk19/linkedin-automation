@@ -185,6 +185,22 @@ def test_linkedin_retries_once_when_provider_returns_empty() -> None:
     assert out.texto == "1. Topico"
 
 
+def test_linkedin_retries_once_on_transient_provider_error() -> None:
+    """429/timeout/conn reset do provedor sao transitorios; o agente tenta
+    uma segunda vez antes de propagar o erro."""
+
+    provider = FakeAIProvider(
+        chat_response='{"title": "T", "texto": "1. Topico", "hashtags": ["#ok"]}',
+        fail_first_with=RuntimeError("429 Too Many Requests"),
+    )
+    agent = LinkedInAgent(
+        provider=provider, prompt_engine=PromptEngine(PROMPTS), runs=FakeAgentRunRepository()
+    )
+    out = asyncio.run(agent.execute(TenantId.new(), entries=_entries()))
+    assert provider.calls == 2
+    assert out.title == "T"
+
+
 def test_linkedin_repairs_truncated_json_tail() -> None:
     """O modelo corta a resposta no meio de uma string; json_repair fecha a
     string e as chaves, e o post deve ser extraido normalmente."""

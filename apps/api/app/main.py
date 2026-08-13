@@ -191,7 +191,12 @@ def create_app() -> FastAPI:  # noqa: PLR0915 — composition root agrega todos 
     openai_client = None
     if settings.openai_api_key:
         try:
-            client_kwargs: dict[str, Any] = {"api_key": settings.openai_api_key}
+            client_kwargs: dict[str, Any] = {
+                "api_key": settings.openai_api_key,
+                # Falha rapida: sem isso o SDK espera ate 10 min por resposta.
+                "timeout": 60.0,
+                "max_retries": 1,
+            }
             if settings.openai_base_url.strip():
                 client_kwargs["base_url"] = settings.openai_base_url.strip()
             openai_client = AsyncOpenAI(**client_kwargs)

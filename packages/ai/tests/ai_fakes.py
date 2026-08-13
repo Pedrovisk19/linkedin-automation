@@ -22,15 +22,19 @@ class FakeAIProvider:
         *,
         chat_response: str = '{"title":"ok","markdown":"# R","top_learnings":[],"metrics":{}}',
         empty_first: bool = False,
+        fail_first_with: Exception | None = None,
     ) -> None:
         self._chat_response = chat_response
         self._empty_first = empty_first
+        self._fail_first_with = fail_first_with
         self.last_request: ChatRequest | None = None
         self.calls = 0
 
     async def chat(self, request: ChatRequest) -> ChatResponse:
         self.calls += 1
         self.last_request = request
+        if self.calls == 1 and self._fail_first_with is not None:
+            raise self._fail_first_with
         content = "" if (self._empty_first and self.calls == 1) else self._chat_response
         return ChatResponse(
             content=content, prompt_tokens=10, completion_tokens=20, model="fake-1"
