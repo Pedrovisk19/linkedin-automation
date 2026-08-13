@@ -26,6 +26,7 @@ from developer_brain_ai_discord.application.use_cases import (
     HandleApprovalReply,
     HandleInboundMessage,
 )
+from developer_brain_ai_discord.domain.ports import Messenger
 from developer_brain_ai_discord.domain.value_objects import ChannelId
 
 _APPROVE_PREFIX = "approve:"
@@ -64,6 +65,7 @@ async def handle_message(
     tenant_id: TenantId,
     allowed_channel: ChannelId | None,
     inbound_uc: HandleInboundMessage,
+    messenger: Messenger | None = None,
 ) -> None:
     """Processa uma mensagem de texto/audio recebida no canal."""
     target = _allowed_channel_of(channel_id, allowed_channel, "message")
@@ -79,8 +81,12 @@ async def handle_message(
         )
     except DomainError as exc:
         get_logger().warning("discord message domain error", message=str(exc.message))
+        await _reply_error(messenger, target, f"Erro: {exc.message}")
     except Exception:
         get_logger().exception("discord message unexpected error")
+        await _reply_error(
+            messenger, target, "Erro interno ao processar a mensagem. Tente novamente."
+        )
     finally:
         reset_tenant_context()
 
@@ -92,6 +98,7 @@ async def handle_button(
     tenant_id: TenantId,
     allowed_channel: ChannelId | None,
     approval_uc: HandleApprovalReply,
+    messenger: Messenger | None = None,
 ) -> None:
     """Processa o clique nos botoes approve:/reject: da mensagem de aprovacao."""
     target = _allowed_channel_of(channel_id, allowed_channel, "button")
@@ -111,10 +118,21 @@ async def handle_button(
         )
     except DomainError as exc:
         get_logger().warning("discord button domain error", message=str(exc.message))
+        await _reply_error(messenger, target, f"Erro: {exc.message}")
     except Exception:
         get_logger().exception("discord button unexpected error")
+        await _reply_error(messenger, target, "Erro interno ao processar a aprovacao.")
     finally:
         reset_tenant_context()
+
+
+async def _reply_error(messenger: Messenger | None, to: ChannelId, text: str) -> None:
+    if messenger is None:
+        return
+    try:
+        await messenger.send_text(to=to, text=text)
+    except Exception:
+        get_logger().warning("discord error reply failed", text=text)
 
 
 def _parse_approval(custom_id: str | None) -> tuple[bool | None, str]:
@@ -157,15 +175,18 @@ class BrainBot(discord.Client):
         self._allowed_channel = allowed_channel
         self._inbound_uc: HandleInboundMessage | None = None
         self._approval_uc: HandleApprovalReply | None = None
+        self._messenger: Messenger | None = None
 
     def attach_handlers(
         self,
         *,
         inbound_uc: HandleInboundMessage,
         approval_uc: HandleApprovalReply,
+        messenger: Messenger | None = None,
     ) -> None:
         self._inbound_uc = inbound_uc
         self._approval_uc = approval_uc
+        self._messenger = messenger
 
     async def on_message(self, message: Any) -> None:
         if (
@@ -183,6 +204,7 @@ class BrainBot(discord.Client):
             tenant_id=self._tenant_id,
             allowed_channel=self._allowed_channel,
             inbound_uc=self._inbound_uc,
+            messenger=self._messenger,
         )
 
     async def on_interaction(self, interaction: Any) -> None:
@@ -203,6 +225,7 @@ class BrainBot(discord.Client):
             tenant_id=self._tenant_id,
             allowed_channel=self._allowed_channel,
             approval_uc=self._approval_uc,
+            messenger=self._messenger,
         )
 
 

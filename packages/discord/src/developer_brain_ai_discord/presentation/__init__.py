@@ -128,7 +128,11 @@ def mount_discord(
         reject=RejectDraft(drafts_repo),
     )
     send_draft_uc = SendDraftToChannel(messenger=messenger, requests=requests_repo)
-    client.attach_handlers(inbound_uc=inbound_uc, approval_uc=approval_uc)
+    client.attach_handlers(
+        inbound_uc=inbound_uc,
+        approval_uc=approval_uc,
+        messenger=messenger,
+    )
 
     return DiscordWiring(
         client=client,
