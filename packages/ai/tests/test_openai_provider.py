@@ -5,9 +5,11 @@ from __future__ import annotations
 import asyncio
 import json
 
+import httpx
 from ai_fakes import FakeOpenAIClient
 from developer_brain_ai_ai.application.ports import ChatMessage, ChatRequest
 from developer_brain_ai_ai.infrastructure.openai_provider import OpenAIProvider
+from openai import BadRequestError
 from pydantic import BaseModel
 
 
@@ -58,6 +60,37 @@ def test_chat_without_response_format_skips_key() -> None:
     client = FakeOpenAIClient(chat_content="plain")
     provider = OpenAIProvider(client=client)
     asyncio.run(provider.chat(ChatRequest(messages=[ChatMessage(role="user", content="hi")])))
+    assert "response_format" not in client.chat.last_kwargs
+
+
+def test_chat_sends_json_object_when_structured_disabled() -> None:
+    client = FakeOpenAIClient(chat_content=json.dumps({"title": "ok"}))
+    provider = OpenAIProvider(client=client, use_structured_outputs=False)
+    req = ChatRequest(
+        messages=[ChatMessage(role="user", content="hi")],
+        response_format=MyModel,
+    )
+    asyncio.run(provider.chat(req))
+    assert client.chat.last_kwargs["response_format"] == {"type": "json_object"}
+
+
+def test_chat_retries_without_response_format_on_bad_request() -> None:
+    err = BadRequestError(
+        "400",
+        response=httpx.Response(
+            400, request=httpx.Request("POST", "http://provider.local/chat/completions")
+        ),
+        body=None,
+    )
+    client = FakeOpenAIClient(chat_content="plain fallback", fail_first_with=err)
+    provider = OpenAIProvider(client=client, use_structured_outputs=False)
+    req = ChatRequest(
+        messages=[ChatMessage(role="user", content="hi")],
+        response_format=MyModel,
+    )
+    out = asyncio.run(provider.chat(req))
+    assert client.chat.calls == 2
+    assert out.content == "plain fallback"
     assert "response_format" not in client.chat.last_kwargs
 
 

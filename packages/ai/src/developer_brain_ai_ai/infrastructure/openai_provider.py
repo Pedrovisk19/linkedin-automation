@@ -2,8 +2,9 @@
 
 Defensas implementadas:
 - API key injetada (nao lida de env aqui) — testavel com mock client.
-- ``response_format=Model`` (structured outputs OpenAI); fallback p/ JSON se houver
-  erro de schema.
+- ``response_format=Model`` (structured outputs OpenAI); p/ provedores sem
+  structured outputs (Gemini/Groq OpenAI-compat) envia ``json_object``.
+- Se o provider rejeitar o ``response_format``, refaz a chamada sem ele.
 - Tokens contabilizados p/ observabilidade.
 """
 
@@ -11,6 +12,9 @@ from __future__ import annotations
 
 from collections.abc import AsyncIterator
 from typing import Any
+
+from developer_brain_ai_shared.logging import get_logger
+from openai import BadRequestError
 
 from developer_brain_ai_ai.application.ports import (
     ChatRequest,
@@ -56,11 +60,24 @@ class OpenAIProvider:
                         "strict": False,
                     },
                 }
-            # Se use_structured=False, nao envia response_format —
-            # provedores como Gemini OpenAI-compat podem rejeitar/quebrar
-            # com {"type": "json_object"}. O prompt ja instrui JSON.
+            else:
+                # Provedores OpenAI-compat sem structured outputs (Gemini/Groq):
+                # ``json_object`` aumenta muito a aderencia ao JSON. Se o
+                # provider rejeitar, refaz sem response_format (o prompt ja
+                # instrui JSON e o parser tem fallback).
+                kwargs["response_format"] = {"type": "json_object"}
 
-        resp = await self._client.chat.completions.create(**kwargs)
+        try:
+            resp = await self._client.chat.completions.create(**kwargs)
+        except BadRequestError:
+            if "response_format" not in kwargs:
+                raise
+            get_logger().warning(
+                "provider rejeitou response_format; refazendo sem ele",
+                model=self._chat_model,
+            )
+            del kwargs["response_format"]
+            resp = await self._client.chat.completions.create(**kwargs)
         choice = resp.choices[0]
         content = choice.message.content or ""
         usage = getattr(resp, "usage", None)

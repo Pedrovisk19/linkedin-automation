@@ -44,8 +44,14 @@ class FakeAIProvider:
 class FakeOpenAIClient:
     """Mock minimal do AsyncOpenAI. Suporta chat.completions.create + embeddings.create."""
 
-    def __init__(self, *, chat_content: str = "", embedding: list[float] | None = None) -> None:
-        self.chat = _ChatNamespace(chat_content)
+    def __init__(
+        self,
+        *,
+        chat_content: str = "",
+        embedding: list[float] | None = None,
+        fail_first_with: Exception | None = None,
+    ) -> None:
+        self.chat = _ChatNamespace(chat_content, fail_first_with)
         self.embeddings = _EmbeddingsNamespace(embedding or [0.1])
 
 
@@ -76,13 +82,18 @@ class _FakeChatResp:
 
 
 class _ChatNamespace:
-    def __init__(self, content: str) -> None:
+    def __init__(self, content: str, fail_first_with: Exception | None = None) -> None:
         self._content = content
+        self._fail_first_with = fail_first_with
         self.completions = self
         self.last_kwargs: dict = {}
+        self.calls = 0
 
     async def create(self, **kwargs):
         self.last_kwargs = kwargs
+        self.calls += 1
+        if self.calls == 1 and self._fail_first_with is not None:
+            raise self._fail_first_with
         if kwargs.get("stream"):
             return _FakeChatStream(self._content)
         return _FakeChatResp(choices=[_FakeChoice(message=_FakeMessage(self._content))])
