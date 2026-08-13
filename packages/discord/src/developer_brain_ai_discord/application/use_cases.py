@@ -100,7 +100,10 @@ class HandleInboundMessage:
         )
         await self._journal_repo.save(entry)
 
-        draft = await self._generate_or_fallback(tenant_id, entry, raw_text)
+        if _is_direct_post(raw_text):
+            draft = await self._create_draft_direct(tenant_id, entry, raw_text)
+        else:
+            draft = await self._generate_or_fallback(tenant_id, entry, raw_text)
 
         now = utcnow()
         request = DiscordRequest(
@@ -136,6 +139,23 @@ class HandleInboundMessage:
             CreateLinkedInDraftInput(
                 title=_first_line_or_truncate(raw_text),
                 texto=raw_text,
+                source_entry_ids=[str(entry.id)],
+            ),
+        )
+
+    async def _create_draft_direct(
+        self,
+        tenant_id: TenantId,
+        entry: JournalEntry,
+        raw_text: str,
+    ) -> Any:
+        """Cria draft direto do texto do usuario, sem gerar via IA."""
+        content = _strip_post_command(raw_text)
+        return await self._create_draft.execute(
+            tenant_id,
+            CreateLinkedInDraftInput(
+                title=_first_line_or_truncate(content),
+                texto=content,
                 source_entry_ids=[str(entry.id)],
             ),
         )
@@ -276,6 +296,38 @@ class SendDraftToChannel:
 def _first_line_or_truncate(text: str) -> str:
     first = text.strip().splitlines()[0] if text.strip() else text
     return _truncate(first, 200)
+
+
+_DIRECT_POST_PREFIXES = (
+    "poste ",
+    "posteisso ",
+    "poste isso",
+    "posta ",
+    "posta isso",
+    "publica ",
+    "publica isso",
+    "publique ",
+    "publique isso",
+)
+
+
+def _is_direct_post(raw_text: str) -> bool:
+    """Detecta quando o usuario quer postar conteudo direto (sem gerar via IA)."""
+    stripped = raw_text.strip().lower()
+    for prefix in _DIRECT_POST_PREFIXES:
+        if stripped.startswith(prefix):
+            return True
+    return False
+
+
+def _strip_post_command(raw_text: str) -> str:
+    """Remove o comando 'poste isso' / 'publica' do inicio do texto."""
+    stripped = raw_text.strip()
+    lower = stripped.lower()
+    for prefix in _DIRECT_POST_PREFIXES:
+        if lower.startswith(prefix):
+            return stripped[len(prefix):].strip()
+    return stripped
 
 
 def _format_draft_body(draft: Any) -> str:

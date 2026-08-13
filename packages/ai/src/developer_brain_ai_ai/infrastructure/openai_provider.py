@@ -46,8 +46,8 @@ class OpenAIProvider:
         if request.max_tokens:
             kwargs["max_tokens"] = request.max_tokens
         if request.response_format is not None:
-            schema = request.response_format.model_json_schema()
             if self._use_structured:
+                schema = request.response_format.model_json_schema()
                 kwargs["response_format"] = {
                     "type": "json_schema",
                     "json_schema": {
@@ -56,8 +56,9 @@ class OpenAIProvider:
                         "strict": False,
                     },
                 }
-            else:
-                kwargs["response_format"] = {"type": "json_object"}
+            # Se use_structured=False, nao envia response_format —
+            # provedores como Gemini OpenAI-compat podem rejeitar/quebrar
+            # com {"type": "json_object"}. O prompt ja instrui JSON.
 
         resp = await self._client.chat.completions.create(**kwargs)
         choice = resp.choices[0]
