@@ -17,6 +17,7 @@ from typing import Any
 
 from developer_brain_ai_shared.kernel.id import TenantId
 from developer_brain_ai_shared.kernel.timestamp import Timestamps, utcnow
+from developer_brain_ai_shared.logging import get_logger
 from pydantic import BaseModel, Field
 
 from developer_brain_ai_ai.application.dto import SummaryAgentOutput  # noqa: F401
@@ -180,6 +181,10 @@ class LinkedInAgent:
                 "source_entry_ids", [e.get("id", "") for e in entries if e.get("id")]
             )
             return LinkedInDraft(**payload)
+        get_logger().warning(
+            "linkedin fallback: resposta sem JSON valido",
+            raw=content[:2000],
+        )
         return LinkedInDraft(
             title="Post gerado",
             texto=content,
