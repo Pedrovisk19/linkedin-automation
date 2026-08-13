@@ -187,14 +187,39 @@ class LinkedInAgent:
         )
 
     @staticmethod
+    def _sanitize_json_control_chars(content: str) -> str:
+        """Escapa quebras de linha/tab literais dentro de strings de JSON.
+
+        LLMs costumam emitir newlines reais no valor de ``texto`` (tipicamente
+        dentro de code fences) em vez de ``\\n``, o que torna o JSON invalido.
+        Repara preservando a estrutura: fora de strings nada muda.
+        """
+        out: list[str] = []
+        in_string = False
+        escaped = False
+        for ch in content:
+            if in_string and not escaped and ch in ("\n", "\r", "\t"):
+                out.append({"\n": "\\n", "\r": "\\r", "\t": "\\t"}[ch])
+                continue
+            out.append(ch)
+            if escaped:
+                escaped = False
+            elif in_string and ch == "\\":
+                escaped = True
+            elif ch == '"':
+                in_string = not in_string
+        return "".join(out)
+
+    @staticmethod
     def _extract_json_object(content: str) -> dict[str, Any] | None:  # noqa: PLR0912
         """Extrai um JSON object de resposta LLM tolerando code fences e texto ao redor.
 
         - Remove code fences ```json ... ``` ou ``` ... ```
+        - Repara newlines literais dentro de strings (falha comum de LLM)
         - Localiza o primeiro ``{`` ate o ultimo ``}`` e tenta ``json.loads``
         - Retorna ``None`` se nao encontrar JSON valido
         """
-        text = content.strip()
+        text = LinkedInAgent._sanitize_json_control_chars(content).strip()
         # Remove code fences ```json ... ``` ou ``` ... ```
         if text.startswith("```"):
             # descarta a primeira linha (```json ou ```)

@@ -11,8 +11,18 @@ LOG_TAG="auto-pull"
 
 cd "$REPO_DIR"
 
-# fetch rapido (sem merge)
-FETCH_LOG="$(timeout 30 git fetch origin main 2>&1)" || {
+# Serializa execucoes: se outra instancia do auto-pull esta rodando
+# (fetch/pull/up concorrentes causam "cannot lock ref ... but expected"),
+# sai silenciosamente — o timer roda de novo em 2 min.
+exec 9>"$REPO_DIR/.auto-pull.lock"
+flock -n 9 || {
+  echo "[$LOG_TAG] outra execucao em andamento, pulando."
+  exit 0
+}
+
+# fetch rapido (sem merge). Refspec com '+' forca a atualizacao da ref
+# remota mesmo que o valor esperado esteja defasado por um fetch concorrente.
+FETCH_LOG="$(timeout 30 git fetch origin +main:refs/remotes/origin/main 2>&1)" || {
   echo "[$LOG_TAG] git fetch falhou:"
   echo "$FETCH_LOG"
   exit 0

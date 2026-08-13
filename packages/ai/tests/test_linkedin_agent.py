@@ -144,3 +144,25 @@ def test_linkedin_handles_hashtags_as_string_and_drops_invalid() -> None:
 
     draft_list = LinkedInDraft(hashtags=["#FastAPI", "", " ", "9abc", "python"])
     assert draft_list.hashtags == ["fastapi", "python"]
+
+
+def test_linkedin_repairs_literal_newlines_inside_json_strings() -> None:
+    """LLM emite newlines reais dentro do valor de 'texto' (code fences) em vez
+    de \\n; o JSON vira invalido e precisa ser reparado na extracao."""
+
+    body = (
+        "1. Topico\n"
+        "```python\n"
+        'users = session.scalars(select(User)).all()\n'
+        "```"
+    )
+    raw = f'{{"title": "T", "texto": "{body}", "hashtags": ["#Python"]}}'
+    provider = FakeAIProvider(chat_response=raw)
+    agent = LinkedInAgent(
+        provider=provider, prompt_engine=PromptEngine(PROMPTS), runs=FakeAgentRunRepository()
+    )
+    out = asyncio.run(agent.execute(TenantId.new(), entries=_entries()))
+    assert out.title == "T"
+    assert "```python" in out.texto
+    assert "session.scalars" in out.texto
+    assert "abc-1" in out.source_entry_ids

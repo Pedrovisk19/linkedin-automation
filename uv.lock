@@ -850,6 +850,8 @@ name = "developer-brain-ai-news"
 version = "0.1.0"
 source = { editable = "packages/news" }
 dependencies = [
+    { name = "developer-brain-ai-ai" },
+    { name = "developer-brain-ai-content" },
     { name = "developer-brain-ai-shared" },
     { name = "feedparser" },
     { name = "httpx" },
@@ -859,6 +861,8 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "developer-brain-ai-ai", editable = "packages/ai" },
+    { name = "developer-brain-ai-content", editable = "packages/content" },
     { name = "developer-brain-ai-shared", editable = "packages/shared" },
     { name = "feedparser", specifier = ">=6.0" },
     { name = "httpx", specifier = ">=0.28" },
