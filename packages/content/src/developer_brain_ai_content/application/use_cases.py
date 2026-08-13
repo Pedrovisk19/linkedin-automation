@@ -104,6 +104,8 @@ class GenerateLinkedInDraft:
             hashtags = [Hashtag(h) for h in result.hashtags]
         except ValueError as exc:
             raise ValidationError(str(exc)) from exc
+        if not result.texto.strip():
+            raise ValidationError("IA retornou corpo de post vazio; tente novamente")
 
         now = utcnow()
         draft = ContentDraft(

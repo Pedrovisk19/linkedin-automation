@@ -170,7 +170,7 @@ class NewsDigestAgent:
     def _parse_output(self, content: str, source_url_ids: list[str]) -> NewsDigestDraft:
         try:
             payload = json.loads(content)
-            if not isinstance(payload, dict):
+            if not isinstance(payload, dict) or not str(payload.get("texto", "")).strip():
                 raise ValueError
             payload.setdefault("source_url_ids", source_url_ids)
             return NewsDigestDraft(**payload)

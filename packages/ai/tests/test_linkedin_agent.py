@@ -69,6 +69,17 @@ def test_linkedin_fallback_to_markdown_when_response_not_json() -> None:
     assert "abc-1" in out.source_entry_ids
 
 
+def test_linkedin_fallback_to_markdown_when_json_has_empty_body() -> None:
+    provider = FakeAIProvider(chat_response='{"title":"x","texto":"","hashtags":["#ok"]}')
+    agent = LinkedInAgent(
+        provider=provider, prompt_engine=PromptEngine(PROMPTS), runs=FakeAgentRunRepository()
+    )
+    out = asyncio.run(agent.execute(TenantId.new(), entries=_entries()))
+    assert out.title == "Post gerado"
+    assert out.texto.startswith('{"title"')
+    assert "abc-1" in out.source_entry_ids
+
+
 def test_linkedin_sends_system_prompt_with_template_variables() -> None:
     provider = FakeAIProvider(chat_response="{}")
     agent = LinkedInAgent(

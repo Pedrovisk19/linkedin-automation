@@ -175,7 +175,7 @@ class LinkedInAgent:
 
     def _parse_output(self, content: str, entries: list[dict[str, Any]]) -> LinkedInDraft:
         payload = self._extract_json_object(content)
-        if payload is not None:
+        if payload is not None and str(payload.get("texto", "")).strip():
             payload.setdefault(
                 "source_entry_ids", [e.get("id", "") for e in entries if e.get("id")]
             )
