@@ -60,7 +60,7 @@ class LinkedInDraft(BaseModel):
 @dataclass
 class LinkedInAgentConfig:
     temperature: float = 0.6
-    max_tokens: int = 4096
+    max_tokens: int = 8192
 
 
 class LinkedInAgent:

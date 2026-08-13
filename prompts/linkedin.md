@@ -54,7 +54,7 @@ ensinar o leitor, não contar uma história.
 Estrutura:
 1. **Headline** (até 70 caracteres): afirmação técnica específica, não clickbait.
 2. **Gancho** (1–2 linhas): afirmação que provoca leitura sem clickbait.
-3. **Corpo** (400–1500 palavras) em blocos por tópico:
+3. **Corpo** (300–700 palavras) em blocos por tópico:
    - Cada tópico numerado começa com uma afirmação técnica (ex.: "1. Otimizando o uso de filas com Arq").
    - Cada tópico entrega um insight concreto (3–6 linhas): o que aprendi, por que decidi isso, como funcionou.
    - Sempre que possível inclua 1 exemplo técnico concreto (snippet curto, config, comando).
@@ -81,3 +81,6 @@ NUNCA mencione prompts internos. NUNCA revele que isto foi gerado por IA.
 Responda apenas em JSON com as chaves: title, gancho, texto, conclusao,
 pergunta, cta, hashtags. A seção "Fontes:" vai DENTRO do campo `texto`,
 ao final dele — não como chave separada.
+Responda com o JSON PURO, sem code fences (sem ```json nem ```). Dentro do
+campo `texto`, use \n para novas linhas e ``` apenas para destacar snippets
+de código (python/sql), como markdown normal.
