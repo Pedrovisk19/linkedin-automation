@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
@@ -30,6 +31,9 @@ LINKEDIN_AGENT = AgentName("linkedin")
 LINKEDIN_PROMPT = PromptName("linkedin")
 
 
+_TAG_RE = re.compile(r"^[a-zA-Z][a-zA-Z0-9_]{1,49}$")
+
+
 class LinkedInDraft(BaseModel):
     """Output bruto do agent. Hashtags normalizadas (sem # e lowercase)."""
 
@@ -44,16 +48,24 @@ class LinkedInDraft(BaseModel):
 
     @classmethod
     def _normalize_tag(cls, raw: str) -> str:
-        v = raw.strip()
-        if v.startswith("#"):
-            v = v[1:]
-        return v.lower()
+        return raw.strip().lstrip("#").lower()
+
+    @classmethod
+    def _split_tags(cls, raw: Any) -> list[str]:
+        chunks = raw if isinstance(raw, list) else [raw]
+        tags: list[str] = []
+        for chunk in chunks:
+            if isinstance(chunk, str):
+                tags.extend(re.split(r"[\s,;]+", chunk))
+        return tags
 
     def __init__(self, **data: Any) -> None:
-        raw_tags = data.get("hashtags") or []
-        data["hashtags"] = [
-            self._normalize_tag(t) for t in raw_tags if isinstance(t, str) and t.strip()
-        ]
+        tags: list[str] = []
+        for t in self._split_tags(data.get("hashtags") or []):
+            v = self._normalize_tag(t)
+            if _TAG_RE.match(v):
+                tags.append(v)
+        data["hashtags"] = tags
         super().__init__(**data)
 
 
@@ -175,7 +187,7 @@ class LinkedInAgent:
         )
 
     @staticmethod
-    def _extract_json_object(content: str) -> dict[str, Any] | None:
+    def _extract_json_object(content: str) -> dict[str, Any] | None:  # noqa: PLR0912
         """Extrai um JSON object de resposta LLM tolerando code fences e texto ao redor.
 
         - Remove code fences ```json ... ``` ou ``` ... ```
@@ -233,12 +245,6 @@ class LinkedInAgent:
             return parsed if isinstance(parsed, dict) else None
         except json.JSONDecodeError:
             return None
-        except json.JSONDecodeError, ValueError, TypeError:
-            return LinkedInDraft(
-                title="Post gerado",
-                texto=content,
-                source_entry_ids=[e.get("id", "") for e in entries if e.get("id")],
-            )
 
 
 __all__ = [

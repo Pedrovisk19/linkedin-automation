@@ -56,15 +56,24 @@ class NewsDigestDraft(BaseModel):
 
     @classmethod
     def _normalize_tag(cls, raw: str) -> str:
-        v = raw.strip()
-        if v.startswith("#"):
-            v = v[1:]
-        return v.lower()
+        return raw.strip().lstrip("#").lower()
+
+    @classmethod
+    def _split_tags(cls, raw: Any) -> list[str]:
+        chunks = raw if isinstance(raw, list) else [raw]
+        tags: list[str] = []
+        for chunk in chunks:
+            if isinstance(chunk, str):
+                tags.extend(re.split(r"[\s,;]+", chunk))
+        return tags
 
     def __init__(self, **data: Any) -> None:
-        raw_tags = data.get("hashtags") or []
-        normalized = [self._normalize_tag(t) for t in raw_tags if isinstance(t, str) and t.strip()]
-        data["hashtags"] = [t for t in normalized if _HASHTAG_RE.match(t)]
+        tags: list[str] = []
+        for t in self._split_tags(data.get("hashtags") or []):
+            v = self._normalize_tag(t)
+            if _HASHTAG_RE.match(v):
+                tags.append(v)
+        data["hashtags"] = tags
         super().__init__(**data)
 
 

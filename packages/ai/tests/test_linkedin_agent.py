@@ -8,7 +8,11 @@ from pathlib import Path
 
 from ai_fakes import FakeAgentRunRepository, FakeAIProvider
 from developer_brain_ai_ai.application.prompt_engine import PromptEngine
-from developer_brain_ai_ai.application.use_cases import LinkedInAgent, LinkedInAgentConfig
+from developer_brain_ai_ai.application.use_cases import (
+    LinkedInAgent,
+    LinkedInAgentConfig,
+    LinkedInDraft,
+)
 from developer_brain_ai_shared.kernel.id import TenantId
 
 PROMPTS = Path(__file__).resolve().parents[3] / "prompts"
@@ -117,3 +121,15 @@ def test_linkedin_passes_temperature_max_tokens_from_config() -> None:
     asyncio.run(agent.execute(TenantId.new(), entries=_entries()))
     assert provider.last_request.temperature == 0.7
     assert provider.last_request.max_tokens == 222
+
+
+def test_linkedin_handles_hashtags_as_string_and_drops_invalid() -> None:
+    """LLM pode devolver hashtags como string ou lista com valores invalidos;
+    nenhum deles pode gerar 'hashtag invalida: ''' no dominio de content."""
+
+    draft = LinkedInDraft(hashtags="#Python ##AI programacao,fastapi IA")
+    assert draft.hashtags == ["python", "ai", "programacao", "fastapi", "ia"]
+    assert "" not in draft.hashtags
+
+    draft_list = LinkedInDraft(hashtags=["#FastAPI", "", " ", "9abc", "python"])
+    assert draft_list.hashtags == ["fastapi", "python"]
