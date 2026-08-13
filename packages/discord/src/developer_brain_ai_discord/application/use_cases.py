@@ -24,6 +24,12 @@ from developer_brain_ai_shared.errors.base import DomainError, ValidationError
 from developer_brain_ai_shared.kernel.id import TenantId
 from developer_brain_ai_shared.kernel.timestamp import Timestamps, utcnow
 
+from developer_brain_ai_integrations.application.use_cases import (
+    DisconnectLinkedIn,
+    GetLinkedInStatus,
+    LinkedInAuthUrlBuilder,
+)
+
 from developer_brain_ai_discord.domain.aggregates import DiscordRequest
 from developer_brain_ai_discord.domain.ids import DiscordRequestId
 from developer_brain_ai_discord.domain.ports import (
@@ -55,6 +61,9 @@ class HandleInboundMessage:
         generate_draft: GenerateLinkedInDraft | None,
         transcriber: AudioTranscriber | None = None,
         downloader: AudioDownloader | None = None,
+        linkedin_auth_builder: LinkedInAuthUrlBuilder | None = None,
+        linkedin_status_uc: GetLinkedInStatus | None = None,
+        linkedin_disconnect_uc: DisconnectLinkedIn | None = None,
     ) -> None:
         self._messenger = messenger
         self._journal_repo = journal_repo
@@ -63,6 +72,9 @@ class HandleInboundMessage:
         self._generate_draft = generate_draft
         self._transcriber = transcriber
         self._downloader = downloader
+        self._linkedin_auth = linkedin_auth_builder
+        self._linkedin_status = linkedin_status_uc
+        self._linkedin_disconnect = linkedin_disconnect_uc
 
     async def execute(
         self,
@@ -87,6 +99,14 @@ class HandleInboundMessage:
                 "mensagem vazia (sem texto e sem audio com fala)",
                 details={"reason": "empty_message"},
             )
+
+        cmd = raw_text.strip().lower()
+        if cmd in ("conectar linkedin", "conectar-linkedin", "/conectar linkedin", "/conectar-linkedin"):
+            await self._handle_linkedin_connect(tenant_id, channel_id)
+            return
+        if cmd in ("desconectar linkedin", "desconectar-linkedin", "/desconectar linkedin", "/desconectar-linkedin"):
+            await self._handle_linkedin_disconnect(tenant_id, channel_id)
+            return
 
         entry = JournalEntry.create(
             id=JournalEntryId.new(),
@@ -159,6 +179,56 @@ class HandleInboundMessage:
                 source_entry_ids=[str(entry.id)],
             ),
         )
+
+    async def _handle_linkedin_connect(
+        self,
+        tenant_id: TenantId,
+        channel_id: ChannelId,
+    ) -> None:
+        """Envia a URL de autorizacao OAuth do LinkedIn no canal do Discord."""
+        if self._linkedin_status is not None:
+            status = await self._linkedin_status.execute(tenant_id)
+            if status.connected:
+                await self._messenger.send_text(
+                    to=channel_id,
+                    text=f"LinkedIn ja conectado como {status.member_name or status.member_urn}. Use 'desconectar linkedin' para remover.",
+                )
+                return
+        if self._linkedin_auth is None:
+            await self._messenger.send_text(
+                to=channel_id,
+                text="LinkedIn OAuth nao configurado no servidor.",
+            )
+            return
+        result = self._linkedin_auth.execute(tenant_id)
+        await self._messenger.send_text(
+            to=channel_id,
+            text=f"Conecte seu LinkedIn abrindo este link no navegador:\n{result.authorization_url}",
+        )
+
+    async def _handle_linkedin_disconnect(
+        self,
+        tenant_id: TenantId,
+        channel_id: ChannelId,
+    ) -> None:
+        """Desconecta o LinkedIn do tenant."""
+        if self._linkedin_disconnect is None:
+            await self._messenger.send_text(
+                to=channel_id,
+                text="LinkedIn OAuth nao configurado no servidor.",
+            )
+            return
+        try:
+            await self._linkedin_disconnect.execute(tenant_id)
+            await self._messenger.send_text(
+                to=channel_id,
+                text="LinkedIn desconectado.",
+            )
+        except Exception:
+            await self._messenger.send_text(
+                to=channel_id,
+                text="LinkedIn nao estava conectado.",
+            )
 
 
 class HandleApprovalReply:

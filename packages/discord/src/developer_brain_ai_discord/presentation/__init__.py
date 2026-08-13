@@ -19,6 +19,14 @@ from developer_brain_ai_content.domain.repositories import (
     ContentDraftRepository,
     PublicationQueueRepository,
 )
+from developer_brain_ai_integrations.application.use_cases import (
+    DisconnectLinkedIn,
+    GetLinkedInStatus,
+    LinkedInAuthUrlBuilder,
+)
+from developer_brain_ai_integrations.infrastructure.repositories import (
+    SqlAlchemyLinkedInTokenRepository,
+)
 from developer_brain_ai_journal.infrastructure.repositories import (
     SqlAlchemyJournalEntryRepository,
 )
@@ -69,11 +77,16 @@ def mount_discord(
     linkedin_generator: LinkedInGenerator | None = None,
     linkedin_publisher: LinkedInPostPublisher | None = None,
     openai_client: AsyncOpenAI | None = None,
+    linkedin_auth_builder: LinkedInAuthUrlBuilder | None = None,
 ) -> DiscordWiring:
     """Monta o bot de gateway com DI injetada pelo composition root."""
 
     requests_repo = SqlAlchemyDiscordRequestRepository(session_factory)
     journal_repo = SqlAlchemyJournalEntryRepository(session_factory)
+
+    linkedin_tokens_repo = SqlAlchemyLinkedInTokenRepository(session_factory)
+    linkedin_status_uc = GetLinkedInStatus(linkedin_tokens_repo)
+    linkedin_disconnect_uc = DisconnectLinkedIn(linkedin_tokens_repo)
 
     create_draft = CreateLinkedInDraft(drafts_repo)
     generate_draft = (
@@ -103,6 +116,9 @@ def mount_discord(
         generate_draft=generate_draft,
         transcriber=OpenAIWhisperTranscriber(openai_client) if openai_client else None,
         downloader=HttpAudioDownloader(),
+        linkedin_auth_builder=linkedin_auth_builder,
+        linkedin_status_uc=linkedin_status_uc,
+        linkedin_disconnect_uc=linkedin_disconnect_uc,
     )
     approval_uc = HandleApprovalReply(
         messenger=messenger,

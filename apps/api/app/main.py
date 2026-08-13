@@ -261,6 +261,7 @@ def create_app() -> FastAPI:  # noqa: PLR0915 — composition root agrega todos 
         )
 
     linkedin_publisher = None
+    linkedin_auth_builder = None
     if settings.linkedin_client_id and settings.linkedin_client_secret:
         tokens_repo = SqlAlchemyLinkedInTokenRepository(_session_factory)
         api_client = HttpLinkedInApiClient(
@@ -268,6 +269,14 @@ def create_app() -> FastAPI:  # noqa: PLR0915 — composition root agrega todos 
             client_secret=settings.linkedin_client_secret,
         )
         linkedin_publisher = LinkedInPostPublisher(tokens=tokens_repo, api=api_client)
+        from developer_brain_ai_integrations.application.use_cases import (
+            LinkedInAuthUrlBuilder,
+        )
+        linkedin_auth_builder = LinkedInAuthUrlBuilder(
+            oauth_secret=settings.jwt_secret,
+            client_id=settings.linkedin_client_id,
+            redirect_uri=settings.linkedin_redirect_uri,
+        )
 
         app.include_router(
             mount_integrations(
@@ -284,9 +293,10 @@ def create_app() -> FastAPI:  # noqa: PLR0915 — composition root agrega todos 
         mount_content(
             drafts_repo=content_drafts_repo,
             queue_repo=content_queue_repo,
-            linkedin_generator=linkedin_generator,
+linkedin_generator=linkedin_generator,
             linkedin_publisher=linkedin_publisher,
-            current_user_dep=current_user_dep,
+            openai_client=openai_client,
+            linkedin_auth_builder=linkedin_auth_builder,
         )
     )
 
