@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     openai_chat_model: str = "gpt-4o-mini"
     openai_embedding_model: str = "text-embedding-3-large"
     ai_temperature: float = 0.4
-    ai_max_tokens: int = 2000
+    ai_max_tokens: int = 4096
     ai_language: str = "pt-BR"
     ai_writing_tone: str = "desenvolvedor-compartilhando-evolucao"
 
