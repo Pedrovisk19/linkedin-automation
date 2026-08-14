@@ -243,7 +243,9 @@ def create_app() -> FastAPI:  # noqa: PLR0915 — composition root agrega todos 
             runs=_NoopRunRepo(),
             config=LinkedInAgentConfig(
                 temperature=settings.ai_temperature,
-                max_tokens=settings.ai_max_tokens,
+                # Teto generoso: posts longos (code fences, JSON) nao devem ser
+                # cortados no meio pelo limite de tokens do provedor.
+                max_tokens=max(settings.ai_max_tokens, 8192),
             ),
         )
 
@@ -261,7 +263,7 @@ def create_app() -> FastAPI:  # noqa: PLR0915 — composition root agrega todos 
             runs=_NoopRunRepo(),
             config=NewsDigestAgentConfig(
                 temperature=settings.ai_temperature,
-                max_tokens=settings.ai_max_tokens,
+                max_tokens=max(settings.ai_max_tokens, 8192),
             ),
         )
 
