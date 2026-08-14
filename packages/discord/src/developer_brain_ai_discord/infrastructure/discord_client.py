@@ -9,6 +9,7 @@ O ``HttpAudioDownloader`` baixa anexos de audio via URL direta do CDN.
 
 from __future__ import annotations
 
+import io
 from typing import cast
 
 import discord
@@ -35,6 +36,8 @@ _MIME_BY_EXT = {
 _DISCORD_MSG_LIMIT = 2000
 _CHUNK_BODY_LIMIT = 1900
 
+_CONTINUATION_MARKER = "\n_→ continua na próxima mensagem_"
+
 
 def _chunk_messages(title: str, body: str) -> list[str]:
     """Quebra (title + body) em mensagens <= limite do Discord."""
@@ -53,6 +56,8 @@ def _chunk_messages(title: str, body: str) -> list[str]:
             cut = _CHUNK_BODY_LIMIT
         out.append(remaining[:cut].rstrip())
         remaining = remaining[cut:].lstrip()
+    for i in range(len(out) - 1):
+        out[i] = f"{out[i].rstrip()}{_CONTINUATION_MARKER}"
     return out
 
 
@@ -86,10 +91,12 @@ class DiscordMessenger(Messenger):
             )
         )
         channel = await self._resolve_channel(to)
+        full = f"{title}\n\n{body}" if title else body
         chunks = _chunk_messages(title, body)
         for i, chunk in enumerate(chunks):
             if i == len(chunks) - 1:
-                await channel.send(chunk, view=view)
+                file = discord.File(io.BytesIO(full.encode("utf-8")), filename="post.md")
+                await channel.send(chunk, view=view, file=file)
             else:
                 await channel.send(chunk)
 

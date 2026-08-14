@@ -30,10 +30,16 @@ CHANNEL = ChannelId(987654321)
 
 class _FakeChannel:
     def __init__(self) -> None:
-        self.sent: list[tuple[str, object]] = []
+        self.sent: list[tuple[str, object | None, object | None]] = []
 
-    async def send(self, content: str, *, view: object | None = None) -> None:
-        self.sent.append((content, view))
+    async def send(
+        self,
+        content: str,
+        *,
+        view: object | None = None,
+        file: object | None = None,
+    ) -> None:
+        self.sent.append((content, view, file))
 
 
 class _FakeClient:
@@ -56,7 +62,7 @@ def test_messenger_send_text_uses_cached_channel() -> None:
 
     asyncio.run(messenger.send_text(to=CHANNEL, text="oi"))
 
-    assert channel.sent == [("oi", None)]
+    assert channel.sent == [("oi", None, None)]
 
 
 def test_messenger_send_approval_creates_buttons() -> None:
@@ -69,11 +75,35 @@ def test_messenger_send_approval_creates_buttons() -> None:
         )
     )
 
-    (content, view) = channel.sent[0]
+    (content, view, _file) = channel.sent[0]
     assert content == "Titulo\n\nCorpo"
     custom_ids = [item.custom_id for item in view.children]
     assert "approve:req-1" in custom_ids
     assert "reject:req-1" in custom_ids
+
+
+def test_messenger_send_approval_attaches_full_post_and_marks_continuation() -> None:
+    channel = _FakeChannel()
+    messenger = DiscordMessenger(_FakeClient(channel))  # type: ignore[arg-type]
+    title = "Titulo"
+    body = "".join(f"linha {i}\n" for i in range(700))
+
+    asyncio.run(
+        messenger.send_approval_request(
+            to=CHANNEL, request_id="req-2", title=title, body=body
+        )
+    )
+
+    assert len(channel.sent) >= 2
+    for chunk, _view, _file in channel.sent[:-1]:
+        assert len(chunk) <= 2000
+        assert "→ continua na próxima mensagem" in chunk
+    (last_content, last_view, last_file) = channel.sent[-1]
+    assert "linha 699" in last_content
+    custom_ids = [item.custom_id for item in last_view.children]
+    assert "approve:req-2" in custom_ids
+    assert last_file is not None
+    assert getattr(last_file, "filename", None) == "post.md"
 
 
 def test_messenger_fetches_channel_when_not_cached() -> None:
@@ -84,7 +114,7 @@ def test_messenger_fetches_channel_when_not_cached() -> None:
     asyncio.run(messenger.send_text(to=CHANNEL, text="via fetch"))
 
     assert client._fetches == 1
-    assert channel.sent == [("via fetch", None)]
+    assert channel.sent == [("via fetch", None, None)]
 
 
 @pytest.mark.asyncio

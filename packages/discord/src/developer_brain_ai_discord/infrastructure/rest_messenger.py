@@ -10,6 +10,8 @@ gateway e o fluxo de aprovacao roda na API, como sempre.
 
 from __future__ import annotations
 
+import io
+import json
 from typing import Any
 
 import httpx
@@ -27,6 +29,8 @@ _DISCORD_MSG_LIMIT = 2000
 _CHUNK_BODY_LIMIT = 1900
 
 _HEADERS = {"Content-Type": "application/json"}
+
+_CONTINUATION_MARKER = "\n_→ continua na próxima mensagem_"
 
 
 def _chunk_messages(title: str, body: str) -> list[str]:
@@ -46,6 +50,8 @@ def _chunk_messages(title: str, body: str) -> list[str]:
             cut = _CHUNK_BODY_LIMIT
         out.append(remaining[:cut].rstrip())
         remaining = remaining[cut:].lstrip()
+    for i in range(len(out) - 1):
+        out[i] = f"{out[i].rstrip()}{_CONTINUATION_MARKER}"
     return out
 
 
@@ -69,6 +75,7 @@ class RestDiscordMessenger(Messenger):
     async def send_approval_request(
         self, *, to: ChannelId, request_id: str, title: str, body: str
     ) -> None:
+        full = f"{title}\n\n{body}" if title else body
         chunks = _chunk_messages(title, body)
         for i, chunk in enumerate(chunks):
             payload: dict[str, Any] = {"content": chunk}
@@ -92,16 +99,24 @@ class RestDiscordMessenger(Messenger):
                         ],
                     }
                 ]
-            await self._post_channel_message(to, payload)
+            await self._post_channel_message(to, payload, full if i == len(chunks) - 1 else None)
 
     async def answer_callback(self, callback_query_id: str) -> None:
         return None
 
-    async def _post_channel_message(self, to: ChannelId, payload: dict[str, Any]) -> None:
+    async def _post_channel_message(
+        self, to: ChannelId, payload: dict[str, Any], full: str | None = None
+    ) -> None:
         url = f"{_DISCORD_API}/channels/{to.value}/messages"
         headers = {**_HEADERS, "Authorization": f"Bot {self._token}"}
-        async with httpx.AsyncClient(timeout=self._timeout) as client:
-            resp = await client.post(url, json=payload, headers=headers)
+        if full is not None:
+            files = {"files[0]": ("post.md", io.BytesIO(full.encode("utf-8")), "text/markdown")}
+            data = {"payload_json": json.dumps(payload)}
+            async with httpx.AsyncClient(timeout=self._timeout) as client:
+                resp = await client.post(url, data=data, files=files, headers=headers)
+        else:
+            async with httpx.AsyncClient(timeout=self._timeout) as client:
+                resp = await client.post(url, json=payload, headers=headers)
         if resp.status_code >= 400:
             get_logger().warning(
                 "discord rest send failed",
