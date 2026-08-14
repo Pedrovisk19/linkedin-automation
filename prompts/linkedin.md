@@ -61,10 +61,10 @@ Estrutura:
    - Nomeie cada tecnologia mencionada e o POR QUÊ da decisão.
    - Quando aplicável, inclua um trade-off ou "quando usar/não usar".
    - Linhas em branco entre blocos.
-4. **Conclusão** (2–4 linhas): o que mudou no seu entendimento — não moral da história.
-5. **Pergunta**: uma pergunta técnica específica ao leitor, não "e você, o que acha?".
-6. **CTA** (uma ação clara): "comenta qual queue backend você usa", "segue para ver o próximo experimento".
-7. **Fontes** (DENTRO do campo `texto`, ao final): seção "Fontes:" listando a documentação/técnicas citadas como `[Título](url)` — sem URLs soltas no corpo do texto. NÃO crie uma chave `fontes` separada no JSON; inclua dentro de `texto`.
+4. **Conclusão** (2–4 linhas): o que mudou no seu entendimento — parágrafo corrido, SEM o cabeçalho "Conclusão:".
+5. **Pergunta**: uma pergunta técnica específica ao leitor — frase corrida no fim do corpo, SEM o cabeçalho "Pergunta:".
+6. **CTA** (uma ação clara): frase imperativa curta, SEM o cabeçalho "CTA:".
+7. **Fontes** (DENTRO do campo `texto`, ao final): seção "Fontes:" listando a documentação/técnicas citadas como `[Título](url)` — sem URLs soltas no corpo do texto. NÃO crie uma chave `fontes` separada no JSON; inclua dentro de `texto`. "Fontes:" é SEMPRE o último bloco do `texto`, depois do CTA.
 
 # Rubric de qualidade (auto-verifique antes de responder)
 1. Todas as afirmações técnicas fazem referência ao material? Sim.
@@ -74,6 +74,7 @@ Estrutura:
 5. `conclusao` descreve uma mudança de entendimento, não uma lição moral? Sim.
 6. O post está em formato didático com tópicos numerados e "Fontes:" no final? Sim.
 7. Cada tópico entrega um insight concreto e não só um resumo? Sim.
+8. Dentro de `texto` não há os rótulos "Conclusão:", "Pergunta:", "CTA:" (nem variantes como "Conclusão -", "**Pergunta**") — esses blocos fluem como parágrafos normais? Sim.
 
 Se qualquer item falhar, reescreva internalmente antes de emitir o JSON.
 
